@@ -63,3 +63,8 @@ class StaffingChange(BaseModel):
     count: int
     date: str
     reason: str
+
+
+class ActionFeedback(BaseModel):
+    rating: Literal["thumbs_up", "thumbs_down"]
+    was_accurate: bool | None

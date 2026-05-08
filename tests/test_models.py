@@ -7,6 +7,7 @@ from pydantic import ValidationError
 
 from models import (
     AccommodationSignal,
+    ActionFeedback,
     DemandForecast,
     EventSignal,
     ReActStep,
@@ -208,3 +209,17 @@ def test_staffing_change_records_role_date_reason():
     assert sc.role == "guide"
     assert sc.date == "2026-05-10"
     assert sc.reason == "indoor activity surge"
+
+
+def test_action_feedback_valid_construction():
+    fb = ActionFeedback(
+        feedback_id="fb_001",
+        proposal_id="p_001",
+        business_id="nusa_adventures",
+        submitted_at="2026-05-11T09:00:00Z",
+        rating="thumbs_up",
+        free_text=None,
+        was_accurate=True,
+    )
+    assert fb.rating == "thumbs_up"
+    assert fb.was_accurate is True
