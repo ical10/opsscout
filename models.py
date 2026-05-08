@@ -87,5 +87,10 @@ class ActionProposal(BaseModel):
 
 
 class ActionFeedback(BaseModel):
+    feedback_id: str
+    proposal_id: str
+    business_id: str
+    submitted_at: str
     rating: Literal["thumbs_up", "thumbs_down"]
+    free_text: str | None
     was_accurate: bool | None

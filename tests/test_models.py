@@ -241,6 +241,23 @@ def test_action_feedback_rejects_unknown_rating():
         )
 
 
+def test_action_feedback_records_ids_and_freetext():
+    fb = ActionFeedback(
+        feedback_id="fb_003",
+        proposal_id="p_003",
+        business_id="kopi_nusa_cafe",
+        submitted_at="2026-05-11T09:00:00Z",
+        rating="thumbs_down",
+        free_text="Forecast missed the festival impact.",
+        was_accurate=False,
+    )
+    assert fb.feedback_id == "fb_003"
+    assert fb.proposal_id == "p_003"
+    assert fb.business_id == "kopi_nusa_cafe"
+    assert fb.submitted_at == "2026-05-11T09:00:00Z"
+    assert fb.free_text == "Forecast missed the festival impact."
+
+
 def test_inventory_item_valid_construction():
     item = InventoryItem(
         name="rain_ponchos",
