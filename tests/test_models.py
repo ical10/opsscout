@@ -184,3 +184,14 @@ def test_staffing_change_valid_construction():
     )
     assert sc.action == "add_shift"
     assert sc.count == 2
+
+
+def test_staffing_change_rejects_unknown_action():
+    with pytest.raises(ValidationError):
+        StaffingChange(
+            action="hire_immediately",
+            role="server",
+            count=1,
+            date="2026-05-10",
+            reason="not in the allowed enum",
+        )
