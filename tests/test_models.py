@@ -5,7 +5,12 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from models import AccommodationSignal, EventSignal, WeatherSignal
+from models import (
+    AccommodationSignal,
+    DemandForecast,
+    EventSignal,
+    WeatherSignal,
+)
 
 
 def test_weather_signal_valid_construction():
@@ -66,3 +71,41 @@ def test_accommodation_signal_rejects_unknown_pressure():
             occupancy_pressure="extreme",
             source="airbnb_mcp",
         )
+
+
+def _sample_weather() -> WeatherSignal:
+    return WeatherSignal(
+        date="2026-05-10",
+        condition="heavy_rain",
+        temperature_c=25.0,
+        precipitation_mm=52.0,
+        confidence=0.9,
+        source="mock_weather_mcp",
+    )
+
+
+def _sample_accommodation() -> AccommodationSignal:
+    return AccommodationSignal(
+        date="2026-05-10",
+        available_listings=8,
+        avg_price_usd=275.0,
+        occupancy_pressure="very_high",
+        source="airbnb_mcp",
+    )
+
+
+def test_demand_forecast_valid_construction():
+    f = DemandForecast(
+        business_id="nusa_adventures",
+        forecast_for_date="2026-05-10",
+        generated_at="2026-05-09T08:00:00Z",
+        weather=_sample_weather(),
+        events=[],
+        accommodation=_sample_accommodation(),
+        demand_multiplier=1.6,
+        demand_trend="above_normal",
+        confidence=0.82,
+        reasoning="Heavy rain + tourists stuck indoors → indoor activity spike.",
+    )
+    assert f.demand_multiplier == 1.6
+    assert f.demand_trend == "above_normal"

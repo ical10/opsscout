@@ -30,3 +30,16 @@ class AccommodationSignal(BaseModel):
     avg_price_usd: float
     occupancy_pressure: Literal["low", "medium", "high", "very_high"]
     source: str
+
+
+class DemandForecast(BaseModel):
+    business_id: str
+    forecast_for_date: str
+    generated_at: str
+    weather: WeatherSignal
+    events: list[EventSignal]
+    accommodation: AccommodationSignal
+    demand_multiplier: float
+    demand_trend: str
+    confidence: float
+    reasoning: str
