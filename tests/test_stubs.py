@@ -52,3 +52,12 @@ def test_crew_run_crew_stubbed():
 
     with pytest.raises(NotImplementedError):
         run_crew(business_id="nusa_adventures")
+
+
+def test_graph_build_and_run_stubbed():
+    from graph import build_graph, run_for_business
+
+    with pytest.raises(NotImplementedError):
+        build_graph()
+    with pytest.raises(NotImplementedError):
+        run_for_business(business_id="nusa_adventures")
