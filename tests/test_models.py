@@ -281,6 +281,19 @@ def test_communication_draft_valid_construction():
     assert cd.urgency == "medium"
 
 
+def test_communication_draft_records_recipient_subject_body():
+    cd = CommunicationDraft(
+        channel="email",
+        recipient="staff",
+        subject="Tomorrow's schedule change",
+        body="Please report at 09:00 instead of 07:00.",
+        urgency="high",
+    )
+    assert cd.recipient == "staff"
+    assert cd.subject == "Tomorrow's schedule change"
+    assert cd.body.startswith("Please report")
+
+
 def _sample_forecast() -> DemandForecast:
     return DemandForecast(
         business_id="nusa_adventures",

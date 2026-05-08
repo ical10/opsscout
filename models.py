@@ -76,6 +76,9 @@ class StaffingChange(BaseModel):
 
 class CommunicationDraft(BaseModel):
     channel: Literal["whatsapp", "email", "sms", "instagram_caption"]
+    recipient: str
+    subject: str | None
+    body: str
     urgency: Literal["low", "medium", "high"]
 
 
