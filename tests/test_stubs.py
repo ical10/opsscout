@@ -45,3 +45,10 @@ def test_structured_outputs_extractors_stubbed():
         extract_action_proposal(raw_manager_text="x", forecast=None)  # type: ignore[arg-type]
     with pytest.raises(NotImplementedError):
         extract_react_step(agent_role="X", step_index=0, raw_step_text="x")
+
+
+def test_crew_run_crew_stubbed():
+    from crew import run_crew
+
+    with pytest.raises(NotImplementedError):
+        run_crew(business_id="nusa_adventures")
