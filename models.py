@@ -6,6 +6,11 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 
+class DateRange(BaseModel):
+    start: str
+    end: str
+
+
 class WeatherSignal(BaseModel):
     date: str
     condition: str

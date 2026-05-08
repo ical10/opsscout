@@ -10,6 +10,7 @@ from models import (
     ActionFeedback,
     ActionProposal,
     CommunicationDraft,
+    DateRange,
     DemandForecast,
     EventSignal,
     InventoryItem,
@@ -17,6 +18,12 @@ from models import (
     StaffingChange,
     WeatherSignal,
 )
+
+
+def test_date_range_valid_construction():
+    r = DateRange(start="2026-05-10", end="2026-05-13")
+    assert r.start == "2026-05-10"
+    assert r.end == "2026-05-13"
 
 
 def test_weather_signal_valid_construction():
