@@ -8,6 +8,7 @@ from pydantic import ValidationError
 from models import (
     AccommodationSignal,
     ActionFeedback,
+    CommunicationDraft,
     DemandForecast,
     EventSignal,
     InventoryItem,
@@ -251,3 +252,15 @@ def test_inventory_item_valid_construction():
     assert item.name == "rain_ponchos"
     assert item.suggested_order_quantity == 40.0
     assert item.supplier_name == "Bali Outdoor Supply"
+
+
+def test_communication_draft_valid_construction():
+    cd = CommunicationDraft(
+        channel="whatsapp",
+        recipient="guests",
+        subject=None,
+        body="Heavy rain tomorrow — surfing replaced with cooking class.",
+        urgency="medium",
+    )
+    assert cd.channel == "whatsapp"
+    assert cd.urgency == "medium"

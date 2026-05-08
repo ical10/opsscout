@@ -71,6 +71,11 @@ class StaffingChange(BaseModel):
     reason: str
 
 
+class CommunicationDraft(BaseModel):
+    channel: Literal["whatsapp", "email", "sms", "instagram_caption"]
+    urgency: Literal["low", "medium", "high"]
+
+
 class ActionFeedback(BaseModel):
     rating: Literal["thumbs_up", "thumbs_down"]
     was_accurate: bool | None
