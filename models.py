@@ -39,7 +39,7 @@ class DemandForecast(BaseModel):
     weather: WeatherSignal
     events: list[EventSignal]
     accommodation: AccommodationSignal
-    demand_multiplier: float
+    demand_multiplier: float = Field(ge=0.0, le=5.0)
     demand_trend: str
     confidence: float
     reasoning: str

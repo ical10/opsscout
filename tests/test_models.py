@@ -109,3 +109,19 @@ def test_demand_forecast_valid_construction():
     )
     assert f.demand_multiplier == 1.6
     assert f.demand_trend == "above_normal"
+
+
+def test_demand_forecast_rejects_multiplier_above_five():
+    with pytest.raises(ValidationError):
+        DemandForecast(
+            business_id="nusa_adventures",
+            forecast_for_date="2026-05-10",
+            generated_at="2026-05-09T08:00:00Z",
+            weather=_sample_weather(),
+            events=[],
+            accommodation=_sample_accommodation(),
+            demand_multiplier=7.5,
+            demand_trend="spike",
+            confidence=0.82,
+            reasoning="hyperbole",
+        )
