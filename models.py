@@ -59,7 +59,10 @@ class ReActStep(BaseModel):
 
 class InventoryItem(BaseModel):
     name: str
+    current_quantity: float
+    unit: str
     suggested_order_quantity: float
+    estimated_cost_usd: float | None
     supplier_name: str | None
 
 

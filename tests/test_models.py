@@ -255,6 +255,20 @@ def test_inventory_item_valid_construction():
     assert item.supplier_name == "Bali Outdoor Supply"
 
 
+def test_inventory_item_records_quantity_unit_cost():
+    item = InventoryItem(
+        name="oat_milk",
+        current_quantity=4.0,
+        unit="L",
+        suggested_order_quantity=12.0,
+        estimated_cost_usd=48.0,
+        supplier_name=None,
+    )
+    assert item.current_quantity == 4.0
+    assert item.unit == "L"
+    assert item.estimated_cost_usd == 48.0
+
+
 def test_communication_draft_valid_construction():
     cd = CommunicationDraft(
         channel="whatsapp",
