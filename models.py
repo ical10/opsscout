@@ -40,6 +40,8 @@ class DemandForecast(BaseModel):
     events: list[EventSignal]
     accommodation: AccommodationSignal
     demand_multiplier: float = Field(ge=0.0, le=5.0)
-    demand_trend: str
-    confidence: float
+    demand_trend: Literal[
+        "spike", "above_normal", "normal", "below_normal", "drop"
+    ]
+    confidence: float = Field(ge=0.0, le=1.0)
     reasoning: str

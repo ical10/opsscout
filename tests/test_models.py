@@ -125,3 +125,19 @@ def test_demand_forecast_rejects_multiplier_above_five():
             confidence=0.82,
             reasoning="hyperbole",
         )
+
+
+def test_demand_forecast_rejects_unknown_trend():
+    with pytest.raises(ValidationError):
+        DemandForecast(
+            business_id="nusa_adventures",
+            forecast_for_date="2026-05-10",
+            generated_at="2026-05-09T08:00:00Z",
+            weather=_sample_weather(),
+            events=[],
+            accommodation=_sample_accommodation(),
+            demand_multiplier=1.0,
+            demand_trend="explosive",
+            confidence=0.82,
+            reasoning="not a valid trend",
+        )
