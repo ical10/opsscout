@@ -75,3 +75,10 @@ def test_mock_scenarios_get_scenario_stubbed():
 
     with pytest.raises(NotImplementedError):
         get_scenario(name="storm")
+
+
+def test_main_entry_stubbed():
+    from main import main
+
+    with pytest.raises(NotImplementedError):
+        main()
