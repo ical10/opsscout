@@ -6,6 +6,8 @@ helpers so the agents and Streamlit pages don't sprinkle raw SQL.
 
 from __future__ import annotations
 
+from models import ActionProposal
+
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS businesses (
@@ -54,3 +56,28 @@ def get_business(conn, business_id: str) -> dict:
     if row is None:
         raise KeyError(f"business not found: {business_id}")
     return row[0]
+
+
+def get_proposal(conn, proposal_id: str) -> ActionProposal:
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT proposal FROM proposals WHERE proposal_id = %s",
+            (proposal_id,),
+        )
+        row = cur.fetchone()
+    return ActionProposal.model_validate(row[0])
+
+
+def save_proposal(conn, proposal: ActionProposal) -> None:
+    with conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO proposals (proposal_id, business_id, proposed_at, proposal) "
+            "VALUES (%s, %s, %s, %s::jsonb)",
+            (
+                proposal.proposal_id,
+                proposal.business_id,
+                proposal.proposed_at,
+                proposal.model_dump_json(),
+            ),
+        )
+    conn.commit()
