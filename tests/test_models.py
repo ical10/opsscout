@@ -55,3 +55,14 @@ def test_accommodation_signal_valid_construction():
         source="airbnb_mcp",
     )
     assert a.occupancy_pressure == "very_high"
+
+
+def test_accommodation_signal_rejects_unknown_pressure():
+    with pytest.raises(ValidationError):
+        AccommodationSignal(
+            date="2026-05-10",
+            available_listings=8,
+            avg_price_usd=275.0,
+            occupancy_pressure="extreme",
+            source="airbnb_mcp",
+        )
