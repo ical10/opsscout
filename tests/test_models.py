@@ -10,6 +10,7 @@ from models import (
     ActionFeedback,
     DemandForecast,
     EventSignal,
+    InventoryItem,
     ReActStep,
     StaffingChange,
     WeatherSignal,
@@ -236,3 +237,17 @@ def test_action_feedback_rejects_unknown_rating():
             free_text=None,
             was_accurate=None,
         )
+
+
+def test_inventory_item_valid_construction():
+    item = InventoryItem(
+        name="rain_ponchos",
+        current_quantity=12.0,
+        unit="units",
+        suggested_order_quantity=40.0,
+        estimated_cost_usd=160.0,
+        supplier_name="Bali Outdoor Supply",
+    )
+    assert item.name == "rain_ponchos"
+    assert item.suggested_order_quantity == 40.0
+    assert item.supplier_name == "Bali Outdoor Supply"

@@ -57,6 +57,12 @@ class ReActStep(BaseModel):
     is_final: bool = False
 
 
+class InventoryItem(BaseModel):
+    name: str
+    suggested_order_quantity: float
+    supplier_name: str | None
+
+
 class StaffingChange(BaseModel):
     action: Literal["add_shift", "extend_shift", "reduce_shift", "cancel_shift"]
     role: str
