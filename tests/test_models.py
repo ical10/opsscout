@@ -16,6 +16,7 @@ from models import (
     InventoryItem,
     LocationContext,
     ReActStep,
+    ReActTrace,
     StaffingChange,
     WeatherSignal,
 )
@@ -182,6 +183,28 @@ def test_react_step_allows_null_tool_and_observation():
     assert s.tool_called is None
     assert s.observation is None
     assert s.is_final is False
+
+
+def test_react_trace_valid_construction():
+    step = ReActStep(
+        step_index=0,
+        agent_role="Forecaster",
+        thought="Begin.",
+        tool_called=None,
+        tool_input=None,
+        observation=None,
+    )
+    t = ReActTrace(
+        task_id="t_001",
+        business_id="nusa_adventures",
+        agent_role="Forecaster",
+        steps=[step],
+        final_output_type="DemandForecast",
+    )
+    assert t.task_id == "t_001"
+    assert t.agent_role == "Forecaster"
+    assert len(t.steps) == 1
+    assert t.final_output_type == "DemandForecast"
 
 
 def test_react_step_records_thought_and_index():

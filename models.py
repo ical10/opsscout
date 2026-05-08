@@ -70,6 +70,14 @@ class ReActStep(BaseModel):
     is_final: bool = False
 
 
+class ReActTrace(BaseModel):
+    task_id: str
+    business_id: str
+    agent_role: str
+    steps: list[ReActStep]
+    final_output_type: str
+
+
 class InventoryItem(BaseModel):
     name: str
     current_quantity: float
