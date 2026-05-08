@@ -14,6 +14,7 @@ from models import (
     DemandForecast,
     EventSignal,
     InventoryItem,
+    LocationContext,
     ReActStep,
     StaffingChange,
     WeatherSignal,
@@ -24,6 +25,19 @@ def test_date_range_valid_construction():
     r = DateRange(start="2026-05-10", end="2026-05-13")
     assert r.start == "2026-05-10"
     assert r.end == "2026-05-13"
+
+
+def test_location_context_default_radius_one_km():
+    loc = LocationContext(
+        business_name="Nusa Adventures",
+        address="Jl. Pantai Kuta, Bali",
+        latitude=-8.7,
+        longitude=115.17,
+    )
+    assert loc.business_name == "Nusa Adventures"
+    assert loc.latitude == -8.7
+    assert loc.longitude == 115.17
+    assert loc.radius_km == 1.0
 
 
 def test_weather_signal_valid_construction():

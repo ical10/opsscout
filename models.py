@@ -11,6 +11,14 @@ class DateRange(BaseModel):
     end: str
 
 
+class LocationContext(BaseModel):
+    business_name: str
+    address: str
+    latitude: float
+    longitude: float
+    radius_km: float = 1.0
+
+
 class WeatherSignal(BaseModel):
     date: str
     condition: str
