@@ -48,6 +48,10 @@ class DemandForecast(BaseModel):
 
 
 class ReActStep(BaseModel):
+    step_index: int
+    agent_role: str
+    thought: str
     tool_called: str | None
+    tool_input: dict | None
     observation: str | None
     is_final: bool = False

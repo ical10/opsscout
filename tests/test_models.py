@@ -156,3 +156,18 @@ def test_react_step_allows_null_tool_and_observation():
     assert s.tool_called is None
     assert s.observation is None
     assert s.is_final is False
+
+
+def test_react_step_records_thought_and_index():
+    s = ReActStep(
+        step_index=3,
+        agent_role="Forecaster",
+        thought="Fetching weather first.",
+        tool_called="weather",
+        tool_input={"date": "2026-05-10"},
+        observation="heavy rain forecast",
+    )
+    assert s.step_index == 3
+    assert s.agent_role == "Forecaster"
+    assert s.thought == "Fetching weather first."
+    assert s.tool_input == {"date": "2026-05-10"}
