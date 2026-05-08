@@ -18,3 +18,15 @@ def test_mcp_tools_get_tool_result_stubbed():
 
     with pytest.raises(NotImplementedError):
         get_tool_result(tool="weather", business_id="nusa_adventures")
+
+
+def test_accommodation_signal_get_occupancy_pressure_stubbed():
+    from accommodation_signal import get_occupancy_pressure
+
+    with pytest.raises(NotImplementedError):
+        get_occupancy_pressure(
+            location="Seminyak",
+            latitude=-8.69,
+            longitude=115.16,
+            target_date="2026-05-10",
+        )
