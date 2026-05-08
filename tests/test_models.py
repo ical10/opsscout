@@ -342,3 +342,32 @@ def test_action_proposal_approval_required_defaults_true():
         confidence=0.82,
     )
     assert p.approval_required is True
+
+
+def test_action_proposal_records_full_field_set():
+    p = ActionProposal(
+        proposal_id="p_010",
+        business_id="nusa_adventures",
+        proposed_at="2026-05-09T08:30:00Z",
+        forecast=_sample_forecast(),
+        inventory_actions=[],
+        staffing_actions=[],
+        communications=[],
+        estimated_cost_usd=240.0,
+        reversible=False,
+        priority="urgent",
+        summary_for_owner="Cancel surf, add cooking class, alert guests.",
+        confidence=0.88,
+    )
+    assert p.proposal_id == "p_010"
+    assert p.business_id == "nusa_adventures"
+    assert p.proposed_at == "2026-05-09T08:30:00Z"
+    assert p.forecast.business_id == "nusa_adventures"
+    assert p.inventory_actions == []
+    assert p.staffing_actions == []
+    assert p.communications == []
+    assert p.estimated_cost_usd == 240.0
+    assert p.reversible is False
+    assert p.priority == "urgent"
+    assert p.summary_for_owner.startswith("Cancel surf")
+    assert p.confidence == 0.88

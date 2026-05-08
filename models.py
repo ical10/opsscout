@@ -83,7 +83,19 @@ class CommunicationDraft(BaseModel):
 
 
 class ActionProposal(BaseModel):
+    proposal_id: str
+    business_id: str
+    proposed_at: str
+    forecast: DemandForecast
+    inventory_actions: list[InventoryItem]
+    staffing_actions: list[StaffingChange]
+    communications: list[CommunicationDraft]
+    estimated_cost_usd: float | None
+    reversible: bool
     approval_required: bool = True
+    priority: Literal["low", "medium", "high", "urgent"]
+    summary_for_owner: str
+    confidence: float = Field(ge=0.0, le=1.0)
 
 
 class ActionFeedback(BaseModel):
