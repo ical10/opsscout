@@ -59,4 +59,7 @@ class ReActStep(BaseModel):
 
 class StaffingChange(BaseModel):
     action: Literal["add_shift", "extend_shift", "reduce_shift", "cancel_shift"]
+    role: str
     count: int
+    date: str
+    reason: str

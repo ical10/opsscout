@@ -195,3 +195,16 @@ def test_staffing_change_rejects_unknown_action():
             date="2026-05-10",
             reason="not in the allowed enum",
         )
+
+
+def test_staffing_change_records_role_date_reason():
+    sc = StaffingChange(
+        action="add_shift",
+        role="guide",
+        count=2,
+        date="2026-05-10",
+        reason="indoor activity surge",
+    )
+    assert sc.role == "guide"
+    assert sc.date == "2026-05-10"
+    assert sc.reason == "indoor activity surge"
