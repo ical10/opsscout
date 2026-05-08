@@ -223,3 +223,16 @@ def test_action_feedback_valid_construction():
     )
     assert fb.rating == "thumbs_up"
     assert fb.was_accurate is True
+
+
+def test_action_feedback_rejects_unknown_rating():
+    with pytest.raises(ValidationError):
+        ActionFeedback(
+            feedback_id="fb_002",
+            proposal_id="p_002",
+            business_id="nusa_adventures",
+            submitted_at="2026-05-11T09:00:00Z",
+            rating="meh",
+            free_text=None,
+            was_accurate=None,
+        )
