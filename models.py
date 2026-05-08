@@ -45,3 +45,9 @@ class DemandForecast(BaseModel):
     ]
     confidence: float = Field(ge=0.0, le=1.0)
     reasoning: str
+
+
+class ReActStep(BaseModel):
+    tool_called: str | None
+    observation: str | None
+    is_final: bool = False

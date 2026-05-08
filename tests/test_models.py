@@ -9,6 +9,7 @@ from models import (
     AccommodationSignal,
     DemandForecast,
     EventSignal,
+    ReActStep,
     WeatherSignal,
 )
 
@@ -141,3 +142,17 @@ def test_demand_forecast_rejects_unknown_trend():
             confidence=0.82,
             reasoning="not a valid trend",
         )
+
+
+def test_react_step_allows_null_tool_and_observation():
+    s = ReActStep(
+        step_index=0,
+        agent_role="Forecaster",
+        thought="I need to decide which signal to fetch first.",
+        tool_called=None,
+        tool_input=None,
+        observation=None,
+    )
+    assert s.tool_called is None
+    assert s.observation is None
+    assert s.is_final is False
