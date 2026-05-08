@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual envs
+.venv/
+venv/
+env/
+.env
+
+# Streamlit
+.streamlit/secrets.toml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+
+# Build / dist
+build/
+dist/
+*.egg
+
+# Mock cache (transient)
+mock/cache/
+
+# Demo recordings (kept out of repo)
+*.mov
+*.mp4
+*.webm
+
+# Local infra one-off scripts not for commit
+infra/smoke_test.py
