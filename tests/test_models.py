@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from models import EventSignal, WeatherSignal
+from models import AccommodationSignal, EventSignal, WeatherSignal
 
 
 def test_weather_signal_valid_construction():
@@ -44,3 +44,14 @@ def test_event_signal_valid_construction():
     )
     assert e.name == "Ubud Food Festival"
     assert e.estimated_attendance == 2500
+
+
+def test_accommodation_signal_valid_construction():
+    a = AccommodationSignal(
+        date="2026-05-10",
+        available_listings=8,
+        avg_price_usd=275.0,
+        occupancy_pressure="very_high",
+        source="airbnb_mcp",
+    )
+    assert a.occupancy_pressure == "very_high"

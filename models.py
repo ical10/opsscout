@@ -1,6 +1,8 @@
 # Pydantic data contracts for OpsScout — populated test-by-test.
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -19,4 +21,12 @@ class EventSignal(BaseModel):
     estimated_attendance: int | None
     distance_m: float
     category: str
+    source: str
+
+
+class AccommodationSignal(BaseModel):
+    date: str
+    available_listings: int
+    avg_price_usd: float
+    occupancy_pressure: Literal["low", "medium", "high", "very_high"]
     source: str
