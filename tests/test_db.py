@@ -12,12 +12,19 @@ import pytest
 
 from models import (
     AccommodationSignal,
+    ActionFeedback,
     ActionProposal,
     DemandForecast,
     WeatherSignal,
 )
 
-from db import create_tables, get_business, get_proposal, save_proposal
+from db import (
+    create_tables,
+    get_business,
+    get_proposal,
+    save_feedback,
+    save_proposal,
+)
 
 
 @pytest.mark.postgres
@@ -82,6 +89,35 @@ def _sample_proposal(proposal_id: str) -> ActionProposal:
         summary_for_owner="Cancel surf, expand trek.",
         confidence=0.88,
     )
+
+
+@pytest.mark.postgres
+def test_save_feedback_persists_thumbs_rating(pg_conn):
+    create_tables(pg_conn)
+    fb_id = "test_db_fb_001"
+    fb = ActionFeedback(
+        feedback_id=fb_id,
+        proposal_id="p_001",
+        business_id="nusa_adventures",
+        submitted_at="2026-05-11T09:00:00Z",
+        rating="thumbs_up",
+        free_text="Spot on.",
+        was_accurate=True,
+    )
+    try:
+        save_feedback(pg_conn, fb)
+        with pg_conn.cursor() as cur:
+            cur.execute(
+                "SELECT rating, free_text, was_accurate FROM action_feedback "
+                "WHERE feedback_id = %s",
+                (fb_id,),
+            )
+            row = cur.fetchone()
+        assert row == ("thumbs_up", "Spot on.", True)
+    finally:
+        with pg_conn.cursor() as cur:
+            cur.execute("DELETE FROM action_feedback WHERE feedback_id = %s", (fb_id,))
+            pg_conn.commit()
 
 
 @pytest.mark.postgres

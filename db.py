@@ -6,7 +6,7 @@ helpers so the agents and Streamlit pages don't sprinkle raw SQL.
 
 from __future__ import annotations
 
-from models import ActionProposal
+from models import ActionFeedback, ActionProposal
 
 
 _SCHEMA = """
@@ -78,6 +78,25 @@ def save_proposal(conn, proposal: ActionProposal) -> None:
                 proposal.business_id,
                 proposal.proposed_at,
                 proposal.model_dump_json(),
+            ),
+        )
+    conn.commit()
+
+
+def save_feedback(conn, feedback: ActionFeedback) -> None:
+    with conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO action_feedback "
+            "(feedback_id, proposal_id, business_id, submitted_at, rating, free_text, was_accurate) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s)",
+            (
+                feedback.feedback_id,
+                feedback.proposal_id,
+                feedback.business_id,
+                feedback.submitted_at,
+                feedback.rating,
+                feedback.free_text,
+                feedback.was_accurate,
             ),
         )
     conn.commit()
