@@ -55,3 +55,8 @@ class ReActStep(BaseModel):
     tool_input: dict | None
     observation: str | None
     is_final: bool = False
+
+
+class StaffingChange(BaseModel):
+    action: str
+    count: int

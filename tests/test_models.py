@@ -10,6 +10,7 @@ from models import (
     DemandForecast,
     EventSignal,
     ReActStep,
+    StaffingChange,
     WeatherSignal,
 )
 
@@ -171,3 +172,15 @@ def test_react_step_records_thought_and_index():
     assert s.agent_role == "Forecaster"
     assert s.thought == "Fetching weather first."
     assert s.tool_input == {"date": "2026-05-10"}
+
+
+def test_staffing_change_valid_construction():
+    sc = StaffingChange(
+        action="add_shift",
+        role="server",
+        count=2,
+        date="2026-05-10",
+        reason="Demand spike from indoor pivot.",
+    )
+    assert sc.action == "add_shift"
+    assert sc.count == 2
