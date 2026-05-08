@@ -1,0 +1,25 @@
+{
+  "location": "Seminyak / Canggu, Bali",
+  "events": [
+    {
+      "name": "Bali International Surf Championships",
+      "date": "2026-05-10",
+      "end_date": "2026-05-11",
+      "estimated_attendance": 4200,
+      "distance_m": 550,
+      "category": "sports",
+      "visitor_profile": "international_adventure_traveler",
+      "source": "mock_events_mcp"
+    },
+    {
+      "name": "Ubud Writers & Readers Festival",
+      "date": "2026-05-10",
+      "end_date": "2026-05-12",
+      "estimated_attendance": 2800,
+      "distance_m": 24000,
+      "category": "culture",
+      "visitor_profile": "premium_cultural_traveler",
+      "source": "mock_events_mcp"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "items": [
+    {"name": "Surfboard 6ft",     "current_quantity": 14, "unit": "units", "reorder_threshold": 6,  "activity": "surf"},
+    {"name": "Surfboard 7ft",     "current_quantity": 10, "unit": "units", "reorder_threshold": 4,  "activity": "surf"},
+    {"name": "Wetsuit (M)",       "current_quantity": 8,  "unit": "units", "reorder_threshold": 4,  "activity": "surf"},
+    {"name": "Helmet (rafting)",  "current_quantity": 12, "unit": "units", "reorder_threshold": 6,  "activity": "rafting"},
+    {"name": "Life Jacket",       "current_quantity": 16, "unit": "units", "reorder_threshold": 8,  "activity": "rafting"},
+    {"name": "Rain Poncho",       "current_quantity": 4,  "unit": "units", "reorder_threshold": 12, "activity": "trekking"},
+    {"name": "Trekking Pole",     "current_quantity": 10, "unit": "units", "reorder_threshold": 8,  "activity": "trekking"},
+    {"name": "Headlamp",          "current_quantity": 9,  "unit": "units", "reorder_threshold": 8,  "activity": "trekking"},
+    {"name": "Bicycle (adult)",   "current_quantity": 10, "unit": "units", "reorder_threshold": 5,  "activity": "cycling"},
+    {"name": "First Aid Kit",     "current_quantity": 3,  "unit": "kits",  "reorder_threshold": 2,  "activity": "all"}
+  ],
+  "source": "mock_inventory"
+}

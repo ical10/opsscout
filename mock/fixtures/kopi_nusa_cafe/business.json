@@ -1,0 +1,13 @@
+{
+  "business_id": "kopi_nusa_cafe",
+  "business_name": "Kopi Nusa Café",
+  "tier": 2,
+  "category": "cafe",
+  "address": "Jl. Raya Ubud, Ubud, Bali, Indonesia",
+  "latitude": -8.5069,
+  "longitude": 115.2625,
+  "operating_days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+  "operating_hours": "07:00-22:00",
+  "baseline_daily_guests": 85,
+  "current_staff_count": 4
+}

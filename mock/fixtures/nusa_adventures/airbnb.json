@@ -1,0 +1,10 @@
+{
+  "location": "Seminyak / Canggu, Bali",
+  "query_radius_km": 2.0,
+  "results": [
+    {"date": "2026-05-10", "available_listings": 5,  "avg_price_usd": 285, "baseline_available": 32, "baseline_price_usd": 145},
+    {"date": "2026-05-11", "available_listings": 3,  "avg_price_usd": 310, "baseline_available": 32, "baseline_price_usd": 145},
+    {"date": "2026-05-12", "available_listings": 22, "avg_price_usd": 180, "baseline_available": 32, "baseline_price_usd": 145}
+  ],
+  "source": "mock_airbnb_mcp"
+}

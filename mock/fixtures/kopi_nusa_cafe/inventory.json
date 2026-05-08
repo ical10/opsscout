@@ -1,0 +1,10 @@
+{
+  "items": [
+    {"name": "coffee_beans", "current_quantity": 12.0, "unit": "kg",    "reorder_threshold": 6.0},
+    {"name": "fresh_milk",   "current_quantity": 18.0, "unit": "L",     "reorder_threshold": 8.0},
+    {"name": "oat_milk",     "current_quantity": 6.0,  "unit": "L",     "reorder_threshold": 3.0},
+    {"name": "pastries",     "current_quantity": 32,   "unit": "units", "reorder_threshold": 20},
+    {"name": "cups",         "current_quantity": 240,  "unit": "units", "reorder_threshold": 100}
+  ],
+  "source": "mock_inventory"
+}

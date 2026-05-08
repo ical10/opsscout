@@ -1,0 +1,31 @@
+{
+  "business_id": "nusa_adventures",
+  "business_name": "Nusa Adventures",
+  "tier": 1,
+  "category": "multi_activity_tour_operator",
+  "address": "Jl. Nakula No.18, Seminyak, Bali, Indonesia",
+  "latitude": -8.6897,
+  "longitude": 115.1609,
+  "operating_days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+  "operating_hours": "05:00-20:00",
+  "baseline_daily_guests": 42,
+  "activity_types": [
+    {"id": "surf",     "name": "Surf Lessons",           "zone": "coastal",  "max_capacity": 16, "duration_hrs": 2},
+    {"id": "rafting",  "name": "White Water Rafting",    "zone": "river",    "max_capacity": 12, "duration_hrs": 3},
+    {"id": "trekking", "name": "Volcano Sunrise Trek",   "zone": "highland", "max_capacity": 8,  "duration_hrs": 6},
+    {"id": "cycling",  "name": "Ubud Cycling Tour",      "zone": "highland", "max_capacity": 10, "duration_hrs": 4},
+    {"id": "cultural", "name": "Ubud Cultural Day Trip", "zone": "inland",   "max_capacity": 14, "duration_hrs": 8}
+  ],
+  "staff": [
+    {"name": "Wayan",  "roles": ["surf_guide", "trekking_support"], "available_sat": true},
+    {"name": "Komang", "roles": ["surf_guide", "cycling_guide"],    "available_sat": true},
+    {"name": "Made",   "roles": ["rafting_guide"],                  "available_sat": true},
+    {"name": "Kadek",  "roles": ["trek_lead"],                      "available_sat": true},
+    {"name": "Nyoman", "roles": ["trek_lead", "cultural_guide"],    "available_sat": false},
+    {"name": "Agus",   "roles": ["driver"],                         "available_sat": true},
+    {"name": "Putu",   "roles": ["driver"],                         "available_sat": true}
+  ],
+  "vehicles": 4,
+  "boats": 2,
+  "current_staff_count": 18
+}

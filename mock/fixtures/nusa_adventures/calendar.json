@@ -1,0 +1,41 @@
+{
+  "staff_availability": [
+    {
+      "date": "2026-05-10",
+      "schedule": [
+        {"name": "Wayan",  "assigned_activity": "surf",     "status": "free_if_surf_cancelled"},
+        {"name": "Komang", "assigned_activity": "surf",     "status": "free_if_surf_cancelled"},
+        {"name": "Made",   "assigned_activity": "rafting",  "status": "free_if_rafting_cancelled"},
+        {"name": "Kadek",  "assigned_activity": "trekking", "status": "confirmed"},
+        {"name": "Agus",   "assigned_activity": "driver",   "status": "confirmed"},
+        {"name": "Putu",   "assigned_activity": "driver",   "status": "confirmed"}
+      ],
+      "confirmed_bookings": {
+        "surf":     {"guests": 14, "slots_total": 16},
+        "rafting":  {"guests": 10, "slots_total": 12},
+        "trekking": {"guests": 8,  "slots_total": 8},
+        "cycling":  {"guests": 6,  "slots_total": 10},
+        "cultural": {"guests": 11, "slots_total": 14}
+      }
+    },
+    {
+      "date": "2026-05-11",
+      "schedule": [
+        {"name": "Wayan",  "assigned_activity": "surf",     "status": "free_if_surf_cancelled"},
+        {"name": "Komang", "assigned_activity": "cycling",  "status": "confirmed"},
+        {"name": "Made",   "assigned_activity": "rafting",  "status": "free_if_rafting_cancelled"},
+        {"name": "Kadek",  "assigned_activity": "trekking", "status": "confirmed"},
+        {"name": "Agus",   "assigned_activity": "driver",   "status": "confirmed"},
+        {"name": "Putu",   "assigned_activity": "driver",   "status": "confirmed"}
+      ],
+      "confirmed_bookings": {
+        "surf":     {"guests": 12, "slots_total": 16},
+        "rafting":  {"guests": 8,  "slots_total": 12},
+        "trekking": {"guests": 8,  "slots_total": 8},
+        "cycling":  {"guests": 7,  "slots_total": 10},
+        "cultural": {"guests": 9,  "slots_total": 14}
+      }
+    }
+  ],
+  "source": "mock_calendar_mcp"
+}

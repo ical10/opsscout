@@ -1,0 +1,10 @@
+{
+  "location": "Ubud, Bali",
+  "forecast": [
+    {"date": "2026-05-09", "condition": "light_rain",    "temperature_c": 24, "precipitation_mm": 6,  "wind_kph": 8,  "confidence": 0.91},
+    {"date": "2026-05-10", "condition": "light_rain",    "temperature_c": 23, "precipitation_mm": 9,  "wind_kph": 7,  "confidence": 0.90},
+    {"date": "2026-05-11", "condition": "partly_cloudy", "temperature_c": 25, "precipitation_mm": 3,  "wind_kph": 6,  "confidence": 0.92},
+    {"date": "2026-05-12", "condition": "light_rain",    "temperature_c": 24, "precipitation_mm": 5,  "wind_kph": 7,  "confidence": 0.91}
+  ],
+  "source": "mock_weather_mcp"
+}

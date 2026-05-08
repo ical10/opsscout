@@ -1,0 +1,11 @@
+{
+  "location": "Ubud, Bali",
+  "query_radius_km": 1.5,
+  "results": [
+    {"date": "2026-05-09", "available_listings": 32, "avg_price_usd": 98,  "baseline_available": 30, "baseline_price_usd": 100},
+    {"date": "2026-05-10", "available_listings": 34, "avg_price_usd": 95,  "baseline_available": 30, "baseline_price_usd": 100},
+    {"date": "2026-05-11", "available_listings": 30, "avg_price_usd": 102, "baseline_available": 30, "baseline_price_usd": 100},
+    {"date": "2026-05-12", "available_listings": 28, "avg_price_usd": 108, "baseline_available": 30, "baseline_price_usd": 100}
+  ],
+  "source": "mock_airbnb_mcp"
+}
