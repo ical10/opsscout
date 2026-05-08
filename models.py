@@ -11,3 +11,12 @@ class WeatherSignal(BaseModel):
     precipitation_mm: float
     confidence: float = Field(ge=0.0, le=1.0)
     source: str
+
+
+class EventSignal(BaseModel):
+    name: str
+    date: str
+    estimated_attendance: int | None
+    distance_m: float
+    category: str
+    source: str

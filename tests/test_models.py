@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from models import WeatherSignal
+from models import EventSignal, WeatherSignal
 
 
 def test_weather_signal_valid_construction():
@@ -31,3 +31,16 @@ def test_weather_signal_rejects_confidence_above_one():
             confidence=1.5,
             source="mock_weather_mcp",
         )
+
+
+def test_event_signal_valid_construction():
+    e = EventSignal(
+        name="Ubud Food Festival",
+        date="2026-05-12",
+        estimated_attendance=2500,
+        distance_m=420.0,
+        category="food",
+        source="mock_events_mcp",
+    )
+    assert e.name == "Ubud Food Festival"
+    assert e.estimated_attendance == 2500
