@@ -1,7 +1,7 @@
 # Pydantic data contracts for OpsScout — populated test-by-test.
 from __future__ import annotations
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class WeatherSignal(BaseModel):
@@ -9,5 +9,5 @@ class WeatherSignal(BaseModel):
     condition: str
     temperature_c: float
     precipitation_mm: float
-    confidence: float
+    confidence: float = Field(ge=0.0, le=1.0)
     source: str
