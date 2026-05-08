@@ -61,3 +61,10 @@ def test_graph_build_and_run_stubbed():
         build_graph()
     with pytest.raises(NotImplementedError):
         run_for_business(business_id="nusa_adventures")
+
+
+def test_onboarding_render_stubbed():
+    from onboarding import render_onboarding
+
+    with pytest.raises(NotImplementedError):
+        render_onboarding()
