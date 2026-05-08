@@ -76,6 +76,10 @@ class CommunicationDraft(BaseModel):
     urgency: Literal["low", "medium", "high"]
 
 
+class ActionProposal(BaseModel):
+    approval_required: bool = True
+
+
 class ActionFeedback(BaseModel):
     rating: Literal["thumbs_up", "thumbs_down"]
     was_accurate: bool | None

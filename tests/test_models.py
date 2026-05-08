@@ -8,6 +8,7 @@ from pydantic import ValidationError
 from models import (
     AccommodationSignal,
     ActionFeedback,
+    ActionProposal,
     CommunicationDraft,
     DemandForecast,
     EventSignal,
@@ -264,3 +265,36 @@ def test_communication_draft_valid_construction():
     )
     assert cd.channel == "whatsapp"
     assert cd.urgency == "medium"
+
+
+def _sample_forecast() -> DemandForecast:
+    return DemandForecast(
+        business_id="nusa_adventures",
+        forecast_for_date="2026-05-10",
+        generated_at="2026-05-09T08:00:00Z",
+        weather=_sample_weather(),
+        events=[],
+        accommodation=_sample_accommodation(),
+        demand_multiplier=1.6,
+        demand_trend="above_normal",
+        confidence=0.82,
+        reasoning="indoor pivot",
+    )
+
+
+def test_action_proposal_approval_required_defaults_true():
+    p = ActionProposal(
+        proposal_id="p_001",
+        business_id="nusa_adventures",
+        proposed_at="2026-05-09T08:30:00Z",
+        forecast=_sample_forecast(),
+        inventory_actions=[],
+        staffing_actions=[],
+        communications=[],
+        estimated_cost_usd=None,
+        reversible=True,
+        priority="high",
+        summary_for_owner="Indoor pivot for tomorrow's heavy rain.",
+        confidence=0.82,
+    )
+    assert p.approval_required is True
