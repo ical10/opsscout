@@ -7,11 +7,14 @@ from pathlib import Path
 
 import psycopg
 
+from db import create_tables
+
 FIXTURES_DIR = Path(__file__).parent / "mock" / "fixtures"
 
 
 def seed() -> None:
     with psycopg.connect(os.environ["DATABASE_URL"]) as conn:
+        create_tables(conn)
         with conn.cursor() as cur:
             for biz_id in ("kopi_nusa_cafe", "nusa_adventures"):
                 profile = (FIXTURES_DIR / biz_id / "business.json").read_text()
@@ -31,3 +34,8 @@ def seed() -> None:
                         (biz_id, day.isoformat(), int(50 * multiplier), multiplier),
                     )
         conn.commit()
+
+
+if __name__ == "__main__":
+    seed()
+    print("✅ Seed complete.")
