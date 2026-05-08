@@ -42,3 +42,15 @@ def create_tables(conn) -> None:
     with conn.cursor() as cur:
         cur.execute(_SCHEMA)
     conn.commit()
+
+
+def get_business(conn, business_id: str) -> dict:
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT profile FROM businesses WHERE business_id = %s",
+            (business_id,),
+        )
+        row = cur.fetchone()
+    if row is None:
+        raise KeyError(f"business not found: {business_id}")
+    return row[0]
