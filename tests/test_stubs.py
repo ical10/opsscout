@@ -68,3 +68,10 @@ def test_onboarding_render_stubbed():
 
     with pytest.raises(NotImplementedError):
         render_onboarding()
+
+
+def test_mock_scenarios_get_scenario_stubbed():
+    from mock.scenarios import get_scenario
+
+    with pytest.raises(NotImplementedError):
+        get_scenario(name="storm")
