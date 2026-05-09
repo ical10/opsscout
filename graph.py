@@ -21,19 +21,31 @@ class BusinessState(TypedDict, total=False):
     execution_log: list[dict[str, Any]]
 
 
+def _execute(state: BusinessState) -> BusinessState:
+    log = list(state.get("execution_log") or [])
+    log.append({"action": "executed", "business_id": state["business_id"]})
+    return {**state, "execution_log": log}
+
+
+def _should_execute(state: BusinessState) -> str:
+    from langgraph.graph import END
+    return "execute" if state.get("owner_approved") else END
+
+
 def build_graph() -> Any:
     from langgraph.checkpoint.memory import MemorySaver
     from langgraph.graph import END, StateGraph
 
     builder = StateGraph(BusinessState)
-    for name in ["forecaster", "demand_modeler", "logistics_and_comms", "ops_manager", "await_approval", "execute"]:
+    for name in ["forecaster", "demand_modeler", "logistics_and_comms", "ops_manager", "await_approval"]:
         builder.add_node(name, lambda s: s)
+    builder.add_node("execute", _execute)
     builder.set_entry_point("forecaster")
     builder.add_edge("forecaster", "demand_modeler")
     builder.add_edge("demand_modeler", "logistics_and_comms")
     builder.add_edge("logistics_and_comms", "ops_manager")
     builder.add_edge("ops_manager", "await_approval")
-    builder.add_edge("await_approval", "execute")
+    builder.add_conditional_edges("await_approval", _should_execute, {"execute": "execute", END: END})
     builder.add_edge("execute", END)
     return builder.compile(checkpointer=MemorySaver())
 
