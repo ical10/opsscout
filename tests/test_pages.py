@@ -178,6 +178,35 @@ def test_trace_page_renders_react_steps_in_order(monkeypatch):
     assert "0" in rendered and "1" in rendered and "2" in rendered
 
 
+def test_onboarding_demo_mode_shows_welcome_and_picker(monkeypatch):
+    monkeypatch.setenv("DEMO_MODE", "true")
+    from onboarding import render_onboarding
+
+    app = AppTest.from_function(render_onboarding).run()
+    assert not app.exception
+    headers = (
+        [h.value for h in app.header]
+        + [s.value for s in app.subheader]
+        + [t.value for t in app.title]
+    )
+    assert any("Welcome" in h for h in headers)
+    assert len(app.radio) == 1
+    options = app.radio[0].options
+    assert "Nusa Adventures" in options
+    assert "Kopi Nusa Café" in options
+
+
+def test_onboarding_production_mode_shows_oauth_placeholders(monkeypatch):
+    monkeypatch.setenv("DEMO_MODE", "false")
+    from onboarding import render_onboarding
+
+    app = AppTest.from_function(render_onboarding).run()
+    assert not app.exception
+    button_labels = [b.label for b in app.button]
+    assert "Connect Shopify" in button_labels
+    assert all(b.disabled for b in app.button)
+
+
 def test_history_page_lists_past_proposals(monkeypatch):
     rows = [
         {

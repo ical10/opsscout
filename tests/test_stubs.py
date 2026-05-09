@@ -63,13 +63,6 @@ def test_graph_build_and_run_stubbed():
         run_for_business(business_id="nusa_adventures")
 
 
-def test_onboarding_render_stubbed():
-    from onboarding import render_onboarding
-
-    with pytest.raises(NotImplementedError):
-        render_onboarding()
-
-
 def test_mock_scenarios_get_scenario_stubbed():
     from mock.scenarios import get_scenario
 
