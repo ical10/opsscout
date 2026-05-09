@@ -120,6 +120,45 @@ def extract_demand_forecast(raw_agent_text: str, context: dict) -> DemandForecas
 - [ ] **Step 4: Run** → PASS.
 - [ ] **Step 5: Commit** — `feat(structured): extract_demand_forecast wraps OpenAI parse with schema`.
 
+## Task 1b: `extract_demand_forecast` overrides `generated_at` with current UTC timestamp
+
+> **Why:** The Slice 0.5 reasoning smoke test showed Qwen3 hallucinates this field (returned `2025-04-05T10:00:00Z`). The model has no reliable wall clock. Override in code, mirroring how Task 2 forces `approval_required=True`.
+
+- [ ] **Step 1: Add test**
+
+```python
+def test_extract_demand_forecast_overrides_generated_at(monkeypatch):
+    bad = _sample_forecast()
+    bad.generated_at = "2025-04-05T10:00:00Z"  # model hallucinated past timestamp
+    fake_completion = MagicMock()
+    fake_completion.choices = [MagicMock(message=MagicMock(parsed=bad))]
+    fake_client = MagicMock()
+    fake_client.beta.chat.completions.parse.return_value = fake_completion
+    monkeypatch.setattr("structured_outputs._client", fake_client)
+
+    result = extract_demand_forecast(raw_agent_text="…", context={})
+    # generated_at should be set to "now" by the extractor, not echoed
+    assert result.generated_at != "2025-04-05T10:00:00Z"
+    # and parseable as ISO-8601
+    from datetime import datetime
+    datetime.fromisoformat(result.generated_at.replace("Z", "+00:00"))
+```
+
+- [ ] **Step 2: Run** → FAILS (no override yet).
+
+- [ ] **Step 3: Update impl** — at the bottom of `extract_demand_forecast`, before returning:
+
+```python
+from datetime import datetime, timezone
+# … existing parse code …
+forecast = completion.choices[0].message.parsed
+forecast.generated_at = datetime.now(timezone.utc).isoformat()
+return forecast
+```
+
+- [ ] **Step 4: Run** → PASS.
+- [ ] **Step 5: Commit** — `feat(structured): extract_demand_forecast pins generated_at to now (LLM hallucinates timestamps)`.
+
 ## Task 2: `extract_action_proposal` always forces `approval_required=True`
 
 - [ ] **Step 1: Add test** — fixture returns a proposal where the model wrongly set `approval_required=False`. Assert post-extract is `True`.
