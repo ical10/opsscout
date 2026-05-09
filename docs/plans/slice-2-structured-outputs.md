@@ -101,7 +101,7 @@ _client = OpenAI(
     api_key="not-needed",
 )
 
-_MODEL = "Qwen3-30B-A3B-Instruct"
+_MODEL = "Qwen/Qwen3-30B-A3B-Instruct-2507"
 
 
 def extract_demand_forecast(raw_agent_text: str, context: dict) -> DemandForecast:

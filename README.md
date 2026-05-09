@@ -16,7 +16,7 @@ Targeting: Best Overall + Best of Qwen
 
 ## Tech Stack
 
-- **LLM:** Qwen3-30B-A3B-Instruct via vLLM on AMD MI300X
+- **LLM:** Qwen3-30B-A3B-Instruct-2507 via vLLM on AMD MI300X
 - **Agent Frameworks:** CrewAI 0.80 (multi-agent crew) + LangGraph 0.2.55 (durable state machine with PostgresSaver)
 - **Structured Outputs:** OpenAI SDK 1.51 `beta.chat.completions.parse()` with Pydantic 2.9 models
 - **MCP Servers:** open-meteo (weather), AirBnB, Events, Google Calendar, Gmail, Slack — mock-aware in DEMO_MODE
@@ -55,12 +55,12 @@ The default `DEMO_MODE=true` loads pre-seeded businesses (Nusa Adventures
 
 ## AMD GPU Usage
 
-All inference runs on `Qwen3-30B-A3B-Instruct` served via vLLM on the AMD
+All inference runs on `Qwen3-30B-A3B-Instruct-2507` served via vLLM on the AMD
 Developer Cloud MI300X instance. The MoE 30B-A3B model fits the
 192GB VRAM with `--max-model-len 32768`, exposing an OpenAI-compatible
 `/v1/chat/completions` endpoint with `--tool-call-parser hermes`.
 
-Endpoint URL: `[TO BE FILLED IN SLICE 0.5]`
+Endpoint URL: set via `AMD_VLLM_BASE_URL` in `.env` (gitignored). For development we use an SSH tunnel from the laptop to the droplet's port 8000 — typically `http://localhost:8001/v1` after `ssh -N -L 8001:localhost:8000 root@<droplet-ip>`. See `infra/vllm.md` for the full provisioning runbook.
 
 ## Repo Layout
 
