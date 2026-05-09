@@ -11,6 +11,27 @@ HORIZON_DAYS = 1
 BASELINE_OFFSET_DAYS = 28
 
 
+def _run(coro):
+    # Synchronous fetch is called from sync code paths (mcp_tools dispatcher)
+    # and from async ones (Streamlit, LangGraph). asyncio.run() would crash in
+    # the latter — fall back to a fresh loop in a worker thread when one is
+    # already running.
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(coro)
+    import threading
+    box: dict = {}
+
+    def _target() -> None:
+        box["v"] = asyncio.run(coro)
+
+    t = threading.Thread(target=_target)
+    t.start()
+    t.join()
+    return box["v"]
+
+
 async def _search_listings(location: str, checkin: str, checkout: str) -> list[dict]:
     from mcp import ClientSession, StdioServerParameters
     from mcp.client.stdio import stdio_client
@@ -57,7 +78,7 @@ def fetch(business: dict) -> dict:
         bsl = await _search_listings(location, base_in, base_out)
         return cur, bsl
 
-    current, baseline = asyncio.run(_both())
+    current, baseline = _run(_both())
 
     return {
         "location": business.get("address", location),

@@ -27,3 +27,18 @@ def test_fetch_aggregates_current_and_baseline(monkeypatch) -> None:
     assert row["baseline_available"] == 4
     assert row["baseline_price_usd"] == 106.25
     assert len(calls) == 2
+
+
+def test_fetch_works_inside_running_event_loop(monkeypatch) -> None:
+    import asyncio
+
+    async def fake_search(location: str, checkin: str, checkout: str) -> list[dict]:
+        return [{"price": 100.0}]
+
+    monkeypatch.setattr("providers.airbnb_mcp._search_listings", fake_search)
+
+    async def driver() -> dict:
+        return airbnb_mcp.fetch({"address": "Bali", "latitude": 0.0, "longitude": 0.0})
+
+    result = asyncio.run(driver())
+    assert result["source"] == "openbnb_mcp"
