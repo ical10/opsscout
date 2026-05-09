@@ -35,21 +35,6 @@ def test_accommodation_signal_get_occupancy_pressure_stubbed():
         )
 
 
-def test_structured_outputs_extractors_stubbed():
-    from structured_outputs import (
-        extract_action_proposal,
-        extract_demand_forecast,
-        extract_react_step,
-    )
-
-    with pytest.raises(NotImplementedError):
-        extract_demand_forecast(raw_agent_text="x", context={})
-    with pytest.raises(NotImplementedError):
-        extract_action_proposal(raw_manager_text="x", forecast=None)  # type: ignore[arg-type]
-    with pytest.raises(NotImplementedError):
-        extract_react_step(agent_role="X", step_index=0, raw_step_text="x")
-
-
 def test_crew_run_crew_stubbed():
     from crew import run_crew
 
