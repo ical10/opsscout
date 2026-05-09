@@ -9,6 +9,8 @@ from models import (
     AccommodationSignal,
     ActionProposal,
     DemandForecast,
+    ReActStep,
+    ReActTrace,
     WeatherSignal,
 )
 
@@ -110,6 +112,70 @@ def test_dashboard_renders_pending_proposal_card(monkeypatch):
     button_labels = [b.label for b in app.button]
     assert "Approve" in button_labels
     assert "Reject" in button_labels
+
+
+def test_trace_page_renders_react_steps_in_order(monkeypatch):
+    trace = ReActTrace(
+        task_id="task-1",
+        business_id="nusa_adventures",
+        agent_role="manager",
+        final_output_type="ActionProposal",
+        steps=[
+            ReActStep(
+                step_index=0,
+                agent_role="forecaster",
+                thought="Need weather first",
+                tool_called="weather_lookup",
+                tool_input={"date": "2026-05-10"},
+                observation="sunny, 29C",
+                is_final=False,
+            ),
+            ReActStep(
+                step_index=1,
+                agent_role="forecaster",
+                thought="Check occupancy now",
+                tool_called="airbnb_lookup",
+                tool_input={"date": "2026-05-10"},
+                observation="occupancy high",
+                is_final=False,
+            ),
+            ReActStep(
+                step_index=2,
+                agent_role="manager",
+                thought="Compile proposal",
+                tool_called=None,
+                tool_input=None,
+                observation=None,
+                is_final=True,
+            ),
+        ],
+    )
+
+    import pages._data as _data
+
+    monkeypatch.setattr(_data, "fetch_latest_trace", lambda bid: trace)
+
+    app = AppTest.from_file("pages/3_Trace.py")
+    app.session_state["business_id"] = "nusa_adventures"
+    app.run()
+    assert not app.exception
+
+    rendered = " | ".join(
+        [m.value for m in app.markdown]
+        + [s.value for s in app.subheader]
+        + [c.value for c in app.caption]
+        + [e.label for e in app.expander]
+    )
+    assert "Need weather first" in rendered
+    assert "weather_lookup" in rendered
+    assert "sunny, 29C" in rendered
+    assert "Check occupancy now" in rendered
+    assert "Compile proposal" in rendered
+    idx0 = rendered.index("Need weather first")
+    idx1 = rendered.index("Check occupancy now")
+    idx2 = rendered.index("Compile proposal")
+    assert idx0 < idx1 < idx2
+    assert "0" in rendered and "1" in rendered and "2" in rendered
 
 
 def test_dashboard_approve_updates_db_and_resumes_graph(monkeypatch):

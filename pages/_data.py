@@ -18,6 +18,10 @@ def _connect():
     return psycopg.connect(os.environ["DATABASE_URL"])
 
 
+def fetch_latest_trace(business_id):  # noqa: ARG001
+    return None
+
+
 def update_proposal_status(proposal_id: str, status: str) -> None:
     with _connect() as conn, conn.cursor() as cur:
         cur.execute(
