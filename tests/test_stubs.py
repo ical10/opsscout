@@ -82,7 +82,7 @@ def test_mock_scenarios_get_scenario_stubbed():
 
 @pytest.mark.parametrize(
     "page_file",
-    ["1_Connect.py", "2_Dashboard.py", "3_Trace.py", "4_History.py"],
+    ["2_Dashboard.py", "3_Trace.py", "4_History.py"],
 )
 def test_streamlit_page_module_raises_not_implemented(page_file: str):
     repo_root = Path(__file__).resolve().parent.parent
