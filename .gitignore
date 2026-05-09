@@ -42,3 +42,7 @@ mock/cache/
 
 # Local infra one-off scripts not for commit
 infra/smoke_test.py
+infra/reasoning_test.py
+
+# tdd-guard runtime data (test results, instructions cache)
+.claude/tdd-guard/
