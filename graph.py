@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from typing import Any, TypedDict
 
+from crew import run_crew
 from models import ActionProposal, DemandForecast
 
 
@@ -32,8 +33,7 @@ def _should_execute(state: BusinessState) -> str:
     return "execute" if state.get("owner_approved") else END
 
 
-def build_graph() -> Any:
-    from langgraph.checkpoint.memory import MemorySaver
+def _compile(checkpointer: Any) -> Any:
     from langgraph.graph import END, StateGraph
 
     builder = StateGraph(BusinessState)
@@ -47,10 +47,29 @@ def build_graph() -> Any:
     builder.add_edge("ops_manager", "await_approval")
     builder.add_conditional_edges("await_approval", _should_execute, {"execute": "execute", END: END})
     builder.add_edge("execute", END)
-    return builder.compile(checkpointer=MemorySaver())
+    return builder.compile(checkpointer=checkpointer)
+
+
+def build_graph() -> Any:
+    from langgraph.checkpoint.memory import MemorySaver
+    return _compile(MemorySaver())
 
 
 def run_for_business(business_id: str) -> ActionProposal:
-    raise NotImplementedError(
-        "owned by Slice 3 — see docs/plans/slice-3-crew-graph.md"
+    import os
+
+    import psycopg
+    from langgraph.checkpoint.postgres import PostgresSaver
+
+    proposal = run_crew(business_id)
+    conn = psycopg.connect(os.environ["DATABASE_URL"], autocommit=True)
+    checkpointer = PostgresSaver(conn)
+    checkpointer.setup()
+    graph = _compile(checkpointer)
+    config = {"configurable": {"thread_id": f"opsscout:{business_id}"}}
+    graph.invoke(
+        {"business_id": business_id, "proposal": proposal, "forecast": proposal.forecast,
+         "owner_approved": False, "execution_log": []},
+        config=config,
     )
+    return proposal

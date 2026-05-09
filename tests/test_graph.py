@@ -32,3 +32,53 @@ def test_graph_skips_execute_until_owner_approved(monkeypatch) -> None:
     second = graph.invoke({**first, "owner_approved": True}, config=config)
     assert len(second.get("execution_log") or []) >= 1
     assert second["execution_log"][-1]["action"] == "executed"
+
+
+import pytest
+
+
+@pytest.mark.postgres
+def test_run_for_business_persists_checkpoint_to_postgres(pg_conn, monkeypatch):
+    from models import (
+        AccommodationSignal,
+        ActionProposal,
+        DemandForecast,
+        WeatherSignal,
+    )
+
+    forecast = DemandForecast(
+        business_id="nusa_adventures",
+        forecast_for_date="2026-05-10",
+        generated_at="2026-05-09T08:00:00Z",
+        weather=WeatherSignal(
+            date="2026-05-10", condition="rain", temperature_c=25.0,
+            precipitation_mm=10.0, confidence=0.9, source="openmeteo",
+        ),
+        events=[],
+        accommodation=AccommodationSignal(
+            date="2026-05-10", available_listings=10, avg_price_usd=120.0,
+            occupancy_pressure="medium", source="airbnb_mcp",
+        ),
+        demand_multiplier=1.0, demand_trend="normal",
+        confidence=0.8, reasoning="ok",
+    )
+    fake_proposal = ActionProposal(
+        proposal_id="pg-test", business_id="nusa_adventures",
+        proposed_at="2026-05-09T08:00:00Z", forecast=forecast,
+        inventory_actions=[], staffing_actions=[], communications=[],
+        estimated_cost_usd=0.0, reversible=True, approval_required=True,
+        priority="medium", summary_for_owner="ok", confidence=0.7,
+    )
+    monkeypatch.setattr("graph.run_crew", lambda bid: fake_proposal)
+
+    from graph import run_for_business
+
+    result = run_for_business("nusa_adventures")
+    assert result.business_id == "nusa_adventures"
+
+    cur = pg_conn.cursor()
+    cur.execute(
+        "SELECT thread_id FROM checkpoints WHERE thread_id = %s LIMIT 1",
+        ("opsscout:nusa_adventures",),
+    )
+    assert cur.fetchone() is not None
