@@ -75,6 +75,16 @@ def extract_react_step(
     step_index: int,
     raw_step_text: str,
 ) -> ReActStep:
-    raise NotImplementedError(
-        "owned by Slice 2 — see docs/plans/slice-2-structured-outputs.md"
+    completion = _client.beta.chat.completions.parse(
+        model=_MODEL,
+        messages=[
+            {"role": "system", "content": "Extract one ReAct step into the schema. Use null for tool_input/observation when not applicable."},
+            {"role": "user", "content": f"Agent: {agent_role}\nStep index: {step_index}\n\nStep:\n{raw_step_text}"},
+        ],
+        response_format=ReActStep,
+        temperature=0.0,
     )
+    step = completion.choices[0].message.parsed
+    step.agent_role = agent_role
+    step.step_index = step_index
+    return step

@@ -9,9 +9,14 @@ from models import (
     ActionProposal,
     DemandForecast,
     EventSignal,
+    ReActStep,
     WeatherSignal,
 )
-from structured_outputs import extract_action_proposal, extract_demand_forecast
+from structured_outputs import (
+    extract_action_proposal,
+    extract_demand_forecast,
+    extract_react_step,
+)
 
 
 def _sample_forecast() -> DemandForecast:
@@ -116,3 +121,28 @@ def test_extract_action_proposal_tier2_strips_staffing_actions(monkeypatch):
 
     result = extract_action_proposal(raw_manager_text="…", forecast=forecast)
     assert result.staffing_actions == []
+
+
+def test_extract_react_step_pins_agent_role_and_step_index(monkeypatch):
+    bad_step = ReActStep(
+        step_index=99,
+        agent_role="WrongAgent",
+        thought="check weather",
+        tool_called="weather",
+        tool_input={"business_id": "nusa_adventures"},
+        observation=None,
+        is_final=False,
+    )
+    fake_completion = MagicMock()
+    fake_completion.choices = [MagicMock(message=MagicMock(parsed=bad_step))]
+    fake_client = MagicMock()
+    fake_client.beta.chat.completions.parse.return_value = fake_completion
+    monkeypatch.setattr("structured_outputs._client", fake_client)
+
+    result = extract_react_step(
+        agent_role="DemandForecaster",
+        step_index=3,
+        raw_step_text="…",
+    )
+    assert result.agent_role == "DemandForecaster"
+    assert result.step_index == 3
