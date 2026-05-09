@@ -7,25 +7,67 @@ lives — agents and graph nodes call them, never the OpenAI client directly.
 
 from __future__ import annotations
 
+import json
+import os
+from datetime import datetime, timezone
+from pathlib import Path
+
+from openai import OpenAI
+
 from models import ActionProposal, DemandForecast, ReActStep
+
+_client = OpenAI(
+    base_url=os.getenv("AMD_VLLM_BASE_URL", "http://localhost:8000/v1"),
+    api_key="not-needed",
+)
+
+_MODEL = "Qwen/Qwen3-30B-A3B-Instruct-2507"
+
+
+_FIXTURES = Path(__file__).parent / "mock" / "fixtures"
+
+
+def _is_tier2(business_id: str) -> bool:
+    profile = json.loads((_FIXTURES / business_id / "business.json").read_text())
+    return int(profile.get("tier", 1)) == 2
 
 
 def extract_demand_forecast(
     raw_agent_text: str,
     context: dict,
 ) -> DemandForecast:
-    raise NotImplementedError(
-        "owned by Slice 2 — see docs/plans/slice-2-structured-outputs.md"
+    completion = _client.beta.chat.completions.parse(
+        model=_MODEL,
+        messages=[
+            {"role": "system", "content": "Extract the demand forecast into the schema. Use null when unknown."},
+            {"role": "user", "content": f"Business context: {context}\n\nAnalysis:\n{raw_agent_text}"},
+        ],
+        response_format=DemandForecast,
+        temperature=0.0,
     )
+    forecast = completion.choices[0].message.parsed
+    forecast.generated_at = datetime.now(timezone.utc).isoformat()
+    return forecast
 
 
 def extract_action_proposal(
     raw_manager_text: str,
     forecast: DemandForecast,
 ) -> ActionProposal:
-    raise NotImplementedError(
-        "owned by Slice 2 — see docs/plans/slice-2-structured-outputs.md"
+    completion = _client.beta.chat.completions.parse(
+        model=_MODEL,
+        messages=[
+            {"role": "system", "content": "Extract the action proposal. approval_required MUST be true. staffing_actions MUST be [] for Tier-2 businesses."},
+            {"role": "user", "content": f"Forecast: {forecast.model_dump_json()}\n\nProposal:\n{raw_manager_text}"},
+        ],
+        response_format=ActionProposal,
+        temperature=0.0,
     )
+    proposal = completion.choices[0].message.parsed
+    proposal.approval_required = True
+    if _is_tier2(proposal.business_id):
+        proposal.staffing_actions = []
+    return proposal
 
 
 def extract_react_step(
@@ -33,6 +75,16 @@ def extract_react_step(
     step_index: int,
     raw_step_text: str,
 ) -> ReActStep:
-    raise NotImplementedError(
-        "owned by Slice 2 — see docs/plans/slice-2-structured-outputs.md"
+    completion = _client.beta.chat.completions.parse(
+        model=_MODEL,
+        messages=[
+            {"role": "system", "content": "Extract one ReAct step into the schema. Use null for tool_input/observation when not applicable."},
+            {"role": "user", "content": f"Agent: {agent_role}\nStep index: {step_index}\n\nStep:\n{raw_step_text}"},
+        ],
+        response_format=ReActStep,
+        temperature=0.0,
     )
+    step = completion.choices[0].message.parsed
+    step.agent_role = agent_role
+    step.step_index = step_index
+    return step

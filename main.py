@@ -6,11 +6,13 @@ Trace → History.
 
 from __future__ import annotations
 
+import streamlit as st
+
 
 def main() -> None:
-    raise NotImplementedError(
-        "owned by Slice 4 — see docs/plans/slice-4-streamlit.md"
-    )
+    st.set_page_config(page_title="OpsScout", page_icon="🌦", layout="wide")
+    st.title("OpsScout")
+    st.caption("Use the sidebar to navigate: Connect → Dashboard → Trace → History.")
 
 
 if __name__ == "__main__":
