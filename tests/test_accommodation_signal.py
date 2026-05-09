@@ -40,3 +40,31 @@ def test_occupancy_pressure_high_when_price_spike_alone():
     assert signal.occupancy_pressure == "high"
     assert signal.available_listings == 22
     assert signal.avg_price_usd == 180.0
+
+
+def test_occupancy_pressure_uses_dispatcher_so_live_data_flows_through(monkeypatch):
+    fake_airbnb = {
+        "results": [
+            {
+                "date": "2026-05-10",
+                "available_listings": 7,
+                "avg_price_usd": 240.0,
+                "baseline_available": 30,
+                "baseline_price_usd": 110.0,
+            }
+        ],
+        "source": "openbnb_mcp",
+    }
+    monkeypatch.setattr("accommodation_signal.get_tool_result", lambda tool, business_id: fake_airbnb)
+
+    signal = get_occupancy_pressure(
+        location="Seminyak",
+        latitude=-8.69,
+        longitude=115.16,
+        target_date="2026-05-10",
+        airbnb_agent=None,
+        business_id="nusa_adventures",
+    )
+    assert signal.available_listings == 7
+    assert signal.avg_price_usd == 240.0
+    assert signal.occupancy_pressure == "very_high"
