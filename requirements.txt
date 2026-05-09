@@ -3,8 +3,8 @@ crewai==0.80.0
 langgraph==0.2.55
 langgraph-checkpoint-postgres==2.0.7
 langchain-openai==0.2.14
-openai==1.51.0
-pydantic==2.9.2
+openai==1.58.1
+pydantic==2.10.6
 pydantic-ai==0.0.15
 streamlit==1.40.0
 httpx==0.27.2
