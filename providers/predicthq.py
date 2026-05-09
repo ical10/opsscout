@@ -37,7 +37,7 @@ def fetch(business: dict) -> dict:
             "end_date": raw.get("end", "")[:10],
             "estimated_attendance": raw.get("phq_attendance"),
             "distance_m": 0,
-            "category": raw.get("category"),
+            "category": raw.get("category") or "unknown",
             "visitor_profile": None,
             "source": "predicthq",
         })

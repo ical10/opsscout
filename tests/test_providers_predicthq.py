@@ -63,3 +63,23 @@ def test_fetch_without_phq_token_raises(monkeypatch) -> None:
     business = {"business_id": "x", "latitude": 0.0, "longitude": 0.0}
     with pytest.raises(RuntimeError, match="PHQ_TOKEN"):
         predicthq.fetch(business)
+
+
+def test_fetch_defaults_category_when_missing_and_handles_empty(monkeypatch) -> None:
+    monkeypatch.setenv("PHQ_TOKEN", "tok")
+
+    fake = MagicMock()
+    fake.raise_for_status = MagicMock()
+    fake.json = MagicMock(return_value={
+        "count": 1,
+        "results": [
+            {"id": "x", "title": "T", "start": "2026-05-12T00:00:00Z", "end": "2026-05-12T00:00:00Z"},
+        ],
+    })
+    monkeypatch.setattr("providers.predicthq.httpx.get", lambda *a, **k: fake)
+    business = {"latitude": 0.0, "longitude": 0.0, "address": ""}
+    result = predicthq.fetch(business)
+    assert result["events"][0]["category"] == "unknown"
+
+    fake.json = MagicMock(return_value={"count": 0, "results": []})
+    assert predicthq.fetch(business)["events"] == []

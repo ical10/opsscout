@@ -30,6 +30,9 @@ def _read_fixture(tool: str, business_id: str) -> dict:
 
 
 def _live_fetch(tool: str, business: dict) -> dict | None:
+    # Explicit dispatch (not a dict of bound function refs) so that
+    # tests can monkeypatch e.g. mcp_tools.openmeteo.fetch and the
+    # dispatcher picks up the new symbol on the next call.
     if tool == "weather":
         return openmeteo.fetch(business)
     if tool == "airbnb":
