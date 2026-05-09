@@ -2,12 +2,21 @@ from __future__ import annotations
 
 import os
 
-from crewai import Agent
+from crewai import Agent, Task
 from langchain_openai import ChatOpenAI
 
 from mcp_tools import get_tool_result
 from models import ActionProposal
 from structured_outputs import extract_action_proposal, extract_demand_forecast
+
+
+def _execute_agent(agent: Agent, description: str, expected_output: str = "") -> str:
+    """Run one agent against the local vLLM with the given task and return
+    the raw text. Tests monkeypatch this; the live demo path goes through
+    `agent.execute_task` and the ChatOpenAI llm bound at module load.
+    """
+    task = Task(description=description, expected_output=expected_output, agent=agent)
+    return str(agent.execute_task(task))
 
 llm = ChatOpenAI(
     model="Qwen3-30B-A3B-Instruct-2507",
@@ -106,10 +115,55 @@ def run_crew(business_id: str) -> ActionProposal:
     weather = get_tool_result("weather", business_id)
     events = get_tool_result("events", business_id)
     airbnb = get_tool_result("airbnb", business_id)
+
+    forecaster_text = _execute_agent(
+        forecaster,
+        description=(
+            f"Analyze 7-day demand for business {business_id}. "
+            f"Weather: {weather}. Events: {events}. Accommodation: {airbnb}. "
+            "Cite each signal and produce a demand multiplier (0–5), trend, and confidence."
+        ),
+        expected_output="A demand analysis with multiplier, trend, confidence, and reasoning.",
+    )
     forecast = extract_demand_forecast(
-        raw_agent_text="",
+        raw_agent_text=forecaster_text,
         context={"business_id": business_id, "weather": weather, "events": events, "airbnb": airbnb},
     )
-    get_tool_result("inventory", business_id)
-    get_tool_result("calendar", business_id)
-    return extract_action_proposal(raw_manager_text="", forecast=forecast)
+
+    inventory = get_tool_result("inventory", business_id)
+    calendar = get_tool_result("calendar", business_id)
+
+    modeler_text = _execute_agent(
+        demand_modeler,
+        description=(
+            f"Translate the demand multiplier {forecast.demand_multiplier} into concrete quantities "
+            f"using inventory={inventory} and calendar={calendar}."
+        ),
+        expected_output="Modeled quantities (portions, stock, expected guests).",
+    )
+    logistics_text = _execute_agent(
+        logistics_agent,
+        description=(
+            f"From these modeled quantities ({modeler_text}) produce inventory order proposals "
+            f"and (Tier 1 only) staffing changes. Forecast multiplier: {forecast.demand_multiplier}."
+        ),
+        expected_output="Inventory orders + (if Tier 1) staffing changes.",
+    )
+    comms_text = _execute_agent(
+        comms_agent,
+        description=(
+            f"Draft owner-approval-required communications for the operational plan: {logistics_text}."
+        ),
+        expected_output="Communication drafts ending in [PENDING OWNER APPROVAL].",
+    )
+    ops_text = _execute_agent(
+        ops_manager,
+        description=(
+            f"Merge the logistics plan and communications drafts into a single ActionProposal. "
+            f"Logistics: {logistics_text}. Communications: {comms_text}. "
+            "Set approval_required=True. Top 3 actions only. Plain-English summary."
+        ),
+        expected_output="A single ActionProposal in plain English with priority, summary, and confidence.",
+    )
+
+    return extract_action_proposal(raw_manager_text=ops_text, forecast=forecast)

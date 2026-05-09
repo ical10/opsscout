@@ -88,6 +88,7 @@ def test_run_crew_calls_dispatcher_and_extractors_in_spec_order(monkeypatch) -> 
     monkeypatch.setattr("crew.get_tool_result", fake_tool)
     monkeypatch.setattr("crew.extract_demand_forecast", fake_forecast)
     monkeypatch.setattr("crew.extract_action_proposal", fake_proposal)
+    monkeypatch.setattr("crew._execute_agent", lambda agent, description, expected_output="": "stub")
 
     from crew import run_crew
 
@@ -99,3 +100,52 @@ def test_run_crew_calls_dispatcher_and_extractors_in_spec_order(monkeypatch) -> 
     assert any(c[0] == "extract_action_proposal" for c in calls)
     assert proposal.business_id == "nusa_adventures"
     assert proposal.approval_required is True
+
+
+def test_run_crew_invokes_each_of_the_five_agents(monkeypatch) -> None:
+    invoked: list[str] = []
+
+    def fake_execute(agent, description, expected_output=""):
+        invoked.append(agent.role)
+        return f"<{agent.role} reasoning>"
+
+    captured: dict = {}
+
+    def fake_proposal(raw_manager_text, forecast):
+        captured["raw_manager_text"] = raw_manager_text
+        return _sample_proposal()
+
+    monkeypatch.setattr("crew._execute_agent", fake_execute)
+    monkeypatch.setattr("crew.get_tool_result", lambda t, b, p=None: {
+        "items": [], "events": [], "staff_availability": [],
+        "zones": {"default": {"forecast": []}},
+        "results": [{"date": "2026-05-10", "available_listings": 10,
+                     "avg_price_usd": 100.0, "baseline_available": 10,
+                     "baseline_price_usd": 100.0}],
+        "source": "x",
+    })
+    monkeypatch.setattr("crew.extract_demand_forecast", lambda raw_agent_text, context: _sample_forecast())
+    monkeypatch.setattr("crew.extract_action_proposal", fake_proposal)
+
+    from crew import run_crew
+
+    run_crew(business_id="nusa_adventures")
+
+    assert invoked == [
+        "Demand Forecaster",
+        "Demand Modeler",
+        "Logistics Agent",
+        "Communications Agent",
+        "Operations Manager",
+    ]
+    assert "Operations Manager" in captured["raw_manager_text"]
+
+
+def test_execute_agent_calls_agent_execute_task() -> None:
+    from unittest.mock import patch
+
+    from crew import _execute_agent, forecaster
+
+    with patch.object(type(forecaster), "execute_task", return_value="the forecaster speaks"):
+        out = _execute_agent(forecaster, description="d", expected_output="e")
+    assert out == "the forecaster speaks"
