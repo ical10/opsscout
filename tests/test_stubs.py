@@ -16,18 +16,6 @@ from pathlib import Path
 import pytest
 
 
-def test_accommodation_signal_get_occupancy_pressure_stubbed():
-    from accommodation_signal import get_occupancy_pressure
-
-    with pytest.raises(NotImplementedError):
-        get_occupancy_pressure(
-            location="Seminyak",
-            latitude=-8.69,
-            longitude=115.16,
-            target_date="2026-05-10",
-        )
-
-
 def test_structured_outputs_extractors_stubbed():
     from structured_outputs import (
         extract_action_proposal,
