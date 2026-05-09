@@ -80,13 +80,6 @@ def test_mock_scenarios_get_scenario_stubbed():
         get_scenario(name="storm")
 
 
-def test_main_entry_stubbed():
-    from main import main
-
-    with pytest.raises(NotImplementedError):
-        main()
-
-
 @pytest.mark.parametrize(
     "page_file",
     ["1_Connect.py", "2_Dashboard.py", "3_Trace.py", "4_History.py"],
