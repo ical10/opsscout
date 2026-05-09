@@ -149,3 +149,35 @@ def test_execute_agent_calls_agent_execute_task() -> None:
     with patch.object(type(forecaster), "execute_task", return_value="the forecaster speaks"):
         out = _execute_agent(forecaster, description="d", expected_output="e")
     assert out == "the forecaster speaks"
+
+
+def test_run_crew_for_tier2_returns_empty_staffing_actions(monkeypatch) -> None:
+    """Verifies the wiring: run_crew(kopi_nusa_cafe) flows through to
+    extract_action_proposal, which (per its own unit tests) enforces
+    staffing_actions == [] for Tier-2 businesses."""
+    from models import ActionProposal
+
+    forecast = _sample_forecast()
+
+    def tier2_aware_extractor(raw_manager_text: str, forecast):
+        proposal = _sample_proposal()
+        return ActionProposal(
+            **{**proposal.model_dump(), "business_id": "kopi_nusa_cafe", "staffing_actions": []}
+        )
+
+    monkeypatch.setattr("crew._execute_agent", lambda *a, **kw: "stub")
+    monkeypatch.setattr("crew.get_tool_result", lambda t, b, p=None: {
+        "items": [], "events": [], "staff_availability": [],
+        "zones": {"default": {"forecast": []}},
+        "results": [{"date": "2026-05-10", "available_listings": 30, "avg_price_usd": 100.0,
+                     "baseline_available": 30, "baseline_price_usd": 100.0}],
+        "source": "x",
+    })
+    monkeypatch.setattr("crew.extract_demand_forecast", lambda *a, **kw: forecast)
+    monkeypatch.setattr("crew.extract_action_proposal", tier2_aware_extractor)
+
+    from crew import run_crew
+
+    proposal = run_crew(business_id="kopi_nusa_cafe")
+    assert proposal.business_id == "kopi_nusa_cafe"
+    assert proposal.staffing_actions == []

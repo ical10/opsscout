@@ -119,8 +119,27 @@ def test_business_state_carries_react_trace_and_error_per_spec_section_8() -> No
 import pytest
 
 
+@pytest.fixture
+def _clean_postgres_thread(pg_conn):
+    """Wipe checkpoint rows for `opsscout:nusa_adventures` before + after
+    so reruns don't accumulate rows and the assertion sees a fresh write."""
+    thread = "opsscout:nusa_adventures"
+
+    def _wipe():
+        with pg_conn.cursor() as cur:
+            for table in ("checkpoint_writes", "checkpoint_blobs", "checkpoints"):
+                cur.execute(
+                    f"DELETE FROM {table} WHERE thread_id = %s", (thread,)
+                )
+        pg_conn.commit()
+
+    _wipe()
+    yield
+    _wipe()
+
+
 @pytest.mark.postgres
-def test_run_for_business_persists_checkpoint_to_postgres(pg_conn, monkeypatch):
+def test_run_for_business_persists_checkpoint_to_postgres(pg_conn, monkeypatch, _clean_postgres_thread):
     from models import (
         AccommodationSignal,
         ActionProposal,
