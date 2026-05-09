@@ -7,8 +7,10 @@ lives — agents and graph nodes call them, never the OpenAI client directly.
 
 from __future__ import annotations
 
+import json
 import os
 from datetime import datetime, timezone
+from pathlib import Path
 
 from openai import OpenAI
 
@@ -20,6 +22,14 @@ _client = OpenAI(
 )
 
 _MODEL = "Qwen/Qwen3-30B-A3B-Instruct-2507"
+
+
+_FIXTURES = Path(__file__).parent / "mock" / "fixtures"
+
+
+def _is_tier2(business_id: str) -> bool:
+    profile = json.loads((_FIXTURES / business_id / "business.json").read_text())
+    return int(profile.get("tier", 1)) == 2
 
 
 def extract_demand_forecast(
@@ -55,6 +65,8 @@ def extract_action_proposal(
     )
     proposal = completion.choices[0].message.parsed
     proposal.approval_required = True
+    if _is_tier2(proposal.business_id):
+        proposal.staffing_actions = []
     return proposal
 
 

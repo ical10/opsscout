@@ -89,3 +89,30 @@ def test_extract_action_proposal_overrides_approval_required(monkeypatch):
 
     result = extract_action_proposal(raw_manager_text="…", forecast=forecast)
     assert result.approval_required is True
+
+
+def test_extract_action_proposal_tier2_strips_staffing_actions(monkeypatch):
+    forecast = _sample_forecast()
+    forecast.business_id = "kopi_nusa_cafe"
+    bad = ActionProposal(
+        proposal_id="p_002", business_id="kopi_nusa_cafe",
+        proposed_at="2026-05-09T08:30:00Z", forecast=forecast,
+        inventory_actions=[],
+        staffing_actions=[
+            __import__("models").StaffingChange(
+                action="add_shift", role="barista", count=1,
+                date="2026-05-10", reason="busy",
+            )
+        ],
+        communications=[],
+        estimated_cost_usd=None, reversible=True,
+        priority="medium", summary_for_owner="x", confidence=0.8,
+    )
+    fake_completion = MagicMock()
+    fake_completion.choices = [MagicMock(message=MagicMock(parsed=bad))]
+    fake_client = MagicMock()
+    fake_client.beta.chat.completions.parse.return_value = fake_completion
+    monkeypatch.setattr("structured_outputs._client", fake_client)
+
+    result = extract_action_proposal(raw_manager_text="…", forecast=forecast)
+    assert result.staffing_actions == []
