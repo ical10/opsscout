@@ -8,12 +8,21 @@ servers + OAuth) is out of scope until Slice 5.
 
 from __future__ import annotations
 
+import json
+import os
+from pathlib import Path
+
+FIXTURES_DIR = Path(__file__).parent / "mock" / "fixtures"
+
 
 def get_tool_result(
     tool: str,
     business_id: str,
     params: dict | None = None,
 ) -> dict:
-    raise NotImplementedError(
-        "owned by Slice 1 — see docs/plans/slice-1-mcp-tools.md"
-    )
+    if os.getenv("DEMO_MODE", "true").lower() != "true":
+        raise NotImplementedError(
+            "Production MCP path is out of scope until Slice 5."
+        )
+    fixture_path = FIXTURES_DIR / business_id / f"{tool}.json"
+    return json.loads(fixture_path.read_text())
