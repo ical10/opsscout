@@ -5,7 +5,9 @@ import os
 from crewai import Agent
 from langchain_openai import ChatOpenAI
 
+from mcp_tools import get_tool_result
 from models import ActionProposal
+from structured_outputs import extract_action_proposal, extract_demand_forecast
 
 llm = ChatOpenAI(
     model="Qwen3-30B-A3B-Instruct-2507",
@@ -101,6 +103,13 @@ ops_manager = Agent(
 
 
 def run_crew(business_id: str) -> ActionProposal:
-    raise NotImplementedError(
-        "owned by Slice 3 — see docs/plans/slice-3-crew-graph.md"
+    weather = get_tool_result("weather", business_id)
+    events = get_tool_result("events", business_id)
+    airbnb = get_tool_result("airbnb", business_id)
+    forecast = extract_demand_forecast(
+        raw_agent_text="",
+        context={"business_id": business_id, "weather": weather, "events": events, "airbnb": airbnb},
     )
+    get_tool_result("inventory", business_id)
+    get_tool_result("calendar", business_id)
+    return extract_action_proposal(raw_manager_text="", forecast=forecast)

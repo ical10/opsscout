@@ -13,22 +13,6 @@ from __future__ import annotations
 import pytest
 
 
-def test_crew_run_crew_stubbed():
-    from crew import run_crew
-
-    with pytest.raises(NotImplementedError):
-        run_crew(business_id="nusa_adventures")
-
-
-def test_graph_build_and_run_stubbed():
-    from graph import build_graph, run_for_business
-
-    with pytest.raises(NotImplementedError):
-        build_graph()
-    with pytest.raises(NotImplementedError):
-        run_for_business(business_id="nusa_adventures")
-
-
 def test_mock_scenarios_get_scenario_stubbed():
     from mock.scenarios import get_scenario
 
