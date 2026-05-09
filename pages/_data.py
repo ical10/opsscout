@@ -18,6 +18,15 @@ def _connect():
     return psycopg.connect(os.environ["DATABASE_URL"])
 
 
+def update_proposal_status(proposal_id: str, status: str) -> None:
+    with _connect() as conn, conn.cursor() as cur:
+        cur.execute(
+            "UPDATE proposals SET status = %s WHERE proposal_id = %s",
+            (status, proposal_id),
+        )
+        conn.commit()
+
+
 def fetch_pending_proposal(business_id: str) -> ActionProposal | None:
     with _connect() as conn, conn.cursor() as cur:
         cur.execute(

@@ -112,6 +112,30 @@ def test_dashboard_renders_pending_proposal_card(monkeypatch):
     assert "Reject" in button_labels
 
 
+def test_dashboard_approve_updates_db_and_resumes_graph(monkeypatch):
+    proposal = _make_proposal()
+    import graph
+    import pages._data as _data
+
+    status_calls: list[tuple[str, str]] = []
+    graph_calls: list[str] = []
+    monkeypatch.setattr(_data, "fetch_pending_proposal", lambda bid: proposal)
+    monkeypatch.setattr(
+        _data,
+        "update_proposal_status",
+        lambda pid, status: status_calls.append((pid, status)),
+    )
+    monkeypatch.setattr(graph, "run_for_business", lambda bid: graph_calls.append(bid))
+
+    app = AppTest.from_file("pages/2_Dashboard.py")
+    app.session_state["business_id"] = "nusa_adventures"
+    app.run()
+    [b for b in app.button if b.label == "Approve"][0].click().run()
+
+    assert status_calls == [("prop-1", "approved")]
+    assert graph_calls == ["nusa_adventures"]
+
+
 @pytest.mark.postgres
 def test_fetch_pending_proposal_returns_latest_pending(pg_conn):
     from pages import _data
@@ -133,3 +157,23 @@ def test_fetch_pending_proposal_returns_latest_pending(pg_conn):
     got = _data.fetch_pending_proposal("nusa_adventures")
     assert got is not None
     assert got.proposal_id == "prop-new"
+
+
+@pytest.mark.postgres
+def test_update_proposal_status_writes_status(pg_conn):
+    from pages import _data
+
+    create_tables(pg_conn)
+    with pg_conn.cursor() as cur:
+        cur.execute("DELETE FROM proposals WHERE business_id = 'nusa_adventures'")
+    pg_conn.commit()
+    save_proposal(pg_conn, _make_proposal(proposal_id="prop-x"))
+
+    import os
+
+    os.environ["DATABASE_URL"] = pg_conn.info.dsn
+    _data.update_proposal_status("prop-x", "approved")
+
+    with pg_conn.cursor() as cur:
+        cur.execute("SELECT status FROM proposals WHERE proposal_id = 'prop-x'")
+        assert cur.fetchone()[0] == "approved"
