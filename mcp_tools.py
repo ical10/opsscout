@@ -1,18 +1,42 @@
-"""Mock-aware MCP dispatcher (Slice 1).
+"""Mock-aware MCP dispatcher.
 
-`get_tool_result` is the single funnel for every external data lookup. In
-DEMO_MODE=true (the hackathon default) it reads JSON fixtures from
-`mock/fixtures/<business_id>/<tool>.json`. Production path (real MCP
-servers + OAuth) is out of scope until Slice 5.
+`get_tool_result` is the single funnel for every external data lookup.
+
+- DEMO_MODE=true (default) reads JSON fixtures from
+  ``mock/fixtures/<business_id>/<tool>.json`` — offline, deterministic,
+  hackathon-safe.
+- DEMO_MODE=false routes ``weather``, ``airbnb``, ``events`` to real
+  providers (Open-Meteo, @openbnb MCP, PredictHQ) with a read-through
+  cache at ``mock/cache/`` so demo replays don't burn quota. Tools
+  without a real provider (``inventory``, ``calendar``, ``business``)
+  continue to read fixtures even in live mode.
 """
 
 from __future__ import annotations
 
 import json
 import os
+from datetime import date
 from pathlib import Path
 
-FIXTURES_DIR = Path(__file__).parent / "mock" / "fixtures"
+from providers import airbnb_mcp, cache, openmeteo, predicthq
+
+ROOT = Path(__file__).parent
+FIXTURES_DIR = ROOT / "mock" / "fixtures"
+CACHE_DIR = ROOT / "mock" / "cache"
+
+def _read_fixture(tool: str, business_id: str) -> dict:
+    return json.loads((FIXTURES_DIR / business_id / f"{tool}.json").read_text())
+
+
+def _live_fetch(tool: str, business: dict) -> dict | None:
+    if tool == "weather":
+        return openmeteo.fetch(business)
+    if tool == "airbnb":
+        return airbnb_mcp.fetch(business)
+    if tool == "events":
+        return predicthq.fetch(business)
+    return None
 
 
 def get_tool_result(
@@ -20,9 +44,18 @@ def get_tool_result(
     business_id: str,
     params: dict | None = None,
 ) -> dict:
-    if os.getenv("DEMO_MODE", "true").lower() != "true":
-        raise NotImplementedError(
-            "Production MCP path is out of scope until Slice 5."
-        )
-    fixture_path = FIXTURES_DIR / business_id / f"{tool}.json"
-    return json.loads(fixture_path.read_text())
+    if os.getenv("DEMO_MODE", "true").lower() == "true":
+        return _read_fixture(tool, business_id)
+
+    cache_key = f"{tool}__{business_id}__{date.today().isoformat()}"
+    cached = cache.read(cache_key, CACHE_DIR)
+    if cached is not None:
+        return cached
+
+    business = _read_fixture("business", business_id)
+    live = _live_fetch(tool, business)
+    if live is None:
+        return _read_fixture(tool, business_id)
+
+    cache.write(cache_key, live, CACHE_DIR)
+    return live
