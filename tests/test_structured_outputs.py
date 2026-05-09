@@ -53,3 +53,18 @@ def test_extract_demand_forecast_returns_validated_model(monkeypatch):
     kwargs = fake_client.beta.chat.completions.parse.call_args.kwargs
     assert kwargs["response_format"] is DemandForecast
     assert kwargs["temperature"] == 0.0
+
+
+def test_extract_demand_forecast_overrides_generated_at(monkeypatch):
+    bad = _sample_forecast()
+    bad.generated_at = "2025-04-05T10:00:00Z"  # model hallucinated past timestamp
+    fake_completion = MagicMock()
+    fake_completion.choices = [MagicMock(message=MagicMock(parsed=bad))]
+    fake_client = MagicMock()
+    fake_client.beta.chat.completions.parse.return_value = fake_completion
+    monkeypatch.setattr("structured_outputs._client", fake_client)
+
+    result = extract_demand_forecast(raw_agent_text="…", context={})
+    assert result.generated_at != "2025-04-05T10:00:00Z"
+    from datetime import datetime
+    datetime.fromisoformat(result.generated_at.replace("Z", "+00:00"))

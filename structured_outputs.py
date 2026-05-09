@@ -8,6 +8,7 @@ lives — agents and graph nodes call them, never the OpenAI client directly.
 from __future__ import annotations
 
 import os
+from datetime import datetime, timezone
 
 from openai import OpenAI
 
@@ -34,7 +35,9 @@ def extract_demand_forecast(
         response_format=DemandForecast,
         temperature=0.0,
     )
-    return completion.choices[0].message.parsed
+    forecast = completion.choices[0].message.parsed
+    forecast.generated_at = datetime.now(timezone.utc).isoformat()
+    return forecast
 
 
 def extract_action_proposal(
