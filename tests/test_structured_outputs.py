@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from unittest.mock import MagicMock
 
 import pytest
@@ -146,3 +147,28 @@ def test_extract_react_step_pins_agent_role_and_step_index(monkeypatch):
     )
     assert result.agent_role == "DemandForecaster"
     assert result.step_index == 3
+
+
+@pytest.mark.live
+def test_extract_demand_forecast_live_round_trip():
+    pytest.importorskip("openai")
+    if not os.getenv("AMD_VLLM_BASE_URL"):
+        pytest.skip("AMD_VLLM_BASE_URL not set — skipping live vLLM round-trip")
+
+    raw_text = (
+        "Forecast for nusa_adventures on 2026-05-10. Heavy rain (52mm) is expected. "
+        "Airbnb data shows only 5 listings left at $285 avg, occupancy_pressure=very_high. "
+        "No major events nearby. Tourists will be stuck indoors — demand for indoor and "
+        "rain-friendly tour activities should spike. Estimated demand_multiplier ≈ 1.6, "
+        "trend above_normal, confidence around 0.8."
+    )
+    result = extract_demand_forecast(
+        raw_agent_text=raw_text,
+        context={
+            "business_id": "nusa_adventures",
+            "forecast_for_date": "2026-05-10",
+        },
+    )
+    assert isinstance(result, DemandForecast)
+    assert 0.0 <= result.demand_multiplier <= 5.0
+    assert result.reasoning.strip() != ""
