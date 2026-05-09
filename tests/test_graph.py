@@ -20,6 +20,36 @@ def test_build_graph_has_expected_nodes() -> None:
 
 
 def test_graph_skips_execute_until_owner_approved(monkeypatch) -> None:
+    from models import (
+        AccommodationSignal,
+        ActionProposal,
+        DemandForecast,
+        WeatherSignal,
+    )
+
+    forecast = DemandForecast(
+        business_id="nusa_adventures",
+        forecast_for_date="2026-05-10",
+        generated_at="2026-05-09T08:00:00Z",
+        weather=WeatherSignal(
+            date="2026-05-10", condition="rain", temperature_c=25.0,
+            precipitation_mm=10.0, confidence=0.9, source="openmeteo",
+        ),
+        events=[],
+        accommodation=AccommodationSignal(
+            date="2026-05-10", available_listings=10, avg_price_usd=120.0,
+            occupancy_pressure="medium", source="airbnb_mcp",
+        ),
+        demand_multiplier=1.0, demand_trend="normal",
+        confidence=0.8, reasoning="ok",
+    )
+    monkeypatch.setattr("graph.run_crew", lambda bid: ActionProposal(
+        proposal_id="susp", business_id=bid, proposed_at="2026-05-09T08:00:00Z",
+        forecast=forecast, inventory_actions=[], staffing_actions=[], communications=[],
+        estimated_cost_usd=0.0, reversible=True, approval_required=True,
+        priority="medium", summary_for_owner="ok", confidence=0.7,
+    ))
+
     from graph import build_graph
 
     graph = build_graph()
@@ -32,6 +62,58 @@ def test_graph_skips_execute_until_owner_approved(monkeypatch) -> None:
     second = graph.invoke({**first, "owner_approved": True}, config=config)
     assert len(second.get("execution_log") or []) >= 1
     assert second["execution_log"][-1]["action"] == "executed"
+
+
+def test_ops_manager_node_populates_proposal_via_run_crew(monkeypatch) -> None:
+    from models import (
+        AccommodationSignal,
+        ActionProposal,
+        DemandForecast,
+        WeatherSignal,
+    )
+
+    forecast = DemandForecast(
+        business_id="nusa_adventures",
+        forecast_for_date="2026-05-10",
+        generated_at="2026-05-09T08:00:00Z",
+        weather=WeatherSignal(
+            date="2026-05-10", condition="rain", temperature_c=25.0,
+            precipitation_mm=10.0, confidence=0.9, source="openmeteo",
+        ),
+        events=[],
+        accommodation=AccommodationSignal(
+            date="2026-05-10", available_listings=10, avg_price_usd=120.0,
+            occupancy_pressure="medium", source="airbnb_mcp",
+        ),
+        demand_multiplier=1.0, demand_trend="normal",
+        confidence=0.8, reasoning="ok",
+    )
+    fake = ActionProposal(
+        proposal_id="ops-test", business_id="nusa_adventures",
+        proposed_at="2026-05-09T08:00:00Z", forecast=forecast,
+        inventory_actions=[], staffing_actions=[], communications=[],
+        estimated_cost_usd=0.0, reversible=True, approval_required=True,
+        priority="medium", summary_for_owner="ok", confidence=0.7,
+    )
+    monkeypatch.setattr("graph.run_crew", lambda bid: fake)
+
+    from graph import build_graph
+
+    graph = build_graph()
+    final = graph.invoke(
+        {"business_id": "nusa_adventures", "owner_approved": False, "execution_log": []},
+        config={"configurable": {"thread_id": "ops-test-thread"}},
+    )
+    assert final["proposal"].proposal_id == "ops-test"
+    assert final["forecast"].business_id == "nusa_adventures"
+
+
+def test_business_state_carries_react_trace_and_error_per_spec_section_8() -> None:
+    from graph import BusinessState
+
+    annotations = BusinessState.__annotations__
+    assert "react_trace" in annotations
+    assert "error" in annotations
 
 
 import pytest
