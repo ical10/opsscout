@@ -6,11 +6,12 @@ import pytest
 
 from models import (
     AccommodationSignal,
+    ActionProposal,
     DemandForecast,
     EventSignal,
     WeatherSignal,
 )
-from structured_outputs import extract_demand_forecast
+from structured_outputs import extract_action_proposal, extract_demand_forecast
 
 
 def _sample_forecast() -> DemandForecast:
@@ -68,3 +69,23 @@ def test_extract_demand_forecast_overrides_generated_at(monkeypatch):
     assert result.generated_at != "2025-04-05T10:00:00Z"
     from datetime import datetime
     datetime.fromisoformat(result.generated_at.replace("Z", "+00:00"))
+
+
+def test_extract_action_proposal_overrides_approval_required(monkeypatch):
+    forecast = _sample_forecast()
+    bad_proposal = ActionProposal(
+        proposal_id="p_001", business_id="nusa_adventures",
+        proposed_at="2026-05-09T08:30:00Z", forecast=forecast,
+        inventory_actions=[], staffing_actions=[], communications=[],
+        estimated_cost_usd=None, reversible=True,
+        approval_required=False,  # <-- model lied
+        priority="high", summary_for_owner="x", confidence=0.9,
+    )
+    fake_completion = MagicMock()
+    fake_completion.choices = [MagicMock(message=MagicMock(parsed=bad_proposal))]
+    fake_client = MagicMock()
+    fake_client.beta.chat.completions.parse.return_value = fake_completion
+    monkeypatch.setattr("structured_outputs._client", fake_client)
+
+    result = extract_action_proposal(raw_manager_text="…", forecast=forecast)
+    assert result.approval_required is True

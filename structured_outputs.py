@@ -44,9 +44,18 @@ def extract_action_proposal(
     raw_manager_text: str,
     forecast: DemandForecast,
 ) -> ActionProposal:
-    raise NotImplementedError(
-        "owned by Slice 2 — see docs/plans/slice-2-structured-outputs.md"
+    completion = _client.beta.chat.completions.parse(
+        model=_MODEL,
+        messages=[
+            {"role": "system", "content": "Extract the action proposal. approval_required MUST be true. staffing_actions MUST be [] for Tier-2 businesses."},
+            {"role": "user", "content": f"Forecast: {forecast.model_dump_json()}\n\nProposal:\n{raw_manager_text}"},
+        ],
+        response_format=ActionProposal,
+        temperature=0.0,
     )
+    proposal = completion.choices[0].message.parsed
+    proposal.approval_required = True
+    return proposal
 
 
 def extract_react_step(
