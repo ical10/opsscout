@@ -22,9 +22,20 @@ class BusinessState(TypedDict, total=False):
 
 
 def build_graph() -> Any:
-    raise NotImplementedError(
-        "owned by Slice 3 — see docs/plans/slice-3-crew-graph.md"
-    )
+    from langgraph.checkpoint.memory import MemorySaver
+    from langgraph.graph import END, StateGraph
+
+    builder = StateGraph(BusinessState)
+    for name in ["forecaster", "demand_modeler", "logistics_and_comms", "ops_manager", "await_approval", "execute"]:
+        builder.add_node(name, lambda s: s)
+    builder.set_entry_point("forecaster")
+    builder.add_edge("forecaster", "demand_modeler")
+    builder.add_edge("demand_modeler", "logistics_and_comms")
+    builder.add_edge("logistics_and_comms", "ops_manager")
+    builder.add_edge("ops_manager", "await_approval")
+    builder.add_edge("await_approval", "execute")
+    builder.add_edge("execute", END)
+    return builder.compile(checkpointer=MemorySaver())
 
 
 def run_for_business(business_id: str) -> ActionProposal:
