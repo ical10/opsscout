@@ -178,6 +178,40 @@ def test_trace_page_renders_react_steps_in_order(monkeypatch):
     assert "0" in rendered and "1" in rendered and "2" in rendered
 
 
+def test_history_page_lists_past_proposals(monkeypatch):
+    rows = [
+        {
+            "proposed_at": "2026-05-08T01:00:00",
+            "summary_for_owner": "Saturday surge plan",
+            "status": "approved",
+            "rating": "thumbs_up",
+        },
+        {
+            "proposed_at": "2026-05-07T01:00:00",
+            "summary_for_owner": "Wednesday slowdown plan",
+            "status": "rejected",
+            "rating": "thumbs_down",
+        },
+    ]
+
+    import pages._data as _data
+
+    monkeypatch.setattr(_data, "list_proposals", lambda bid: rows)
+
+    app = AppTest.from_file("pages/4_History.py", default_timeout=10)
+    app.session_state["business_id"] = "nusa_adventures"
+    app.run()
+    assert not app.exception
+    assert len(app.dataframe) == 1
+    df = app.dataframe[0].value
+    summaries = df["summary_for_owner"].tolist()
+    statuses = df["status"].tolist()
+    assert "Saturday surge plan" in summaries
+    assert "Wednesday slowdown plan" in summaries
+    assert "approved" in statuses
+    assert "rejected" in statuses
+
+
 def test_dashboard_approve_updates_db_and_resumes_graph(monkeypatch):
     proposal = _make_proposal()
     import graph

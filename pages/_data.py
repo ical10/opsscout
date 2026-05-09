@@ -22,6 +22,10 @@ def fetch_latest_trace(business_id):  # noqa: ARG001
     return None
 
 
+def list_proposals(business_id):  # noqa: ARG001
+    return []
+
+
 def update_proposal_status(proposal_id: str, status: str) -> None:
     with _connect() as conn, conn.cursor() as cur:
         cur.execute(

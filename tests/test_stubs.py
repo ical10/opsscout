@@ -10,9 +10,6 @@ landed on the right import surface.
 
 from __future__ import annotations
 
-import importlib.util
-from pathlib import Path
-
 import pytest
 
 
@@ -80,17 +77,3 @@ def test_mock_scenarios_get_scenario_stubbed():
         get_scenario(name="storm")
 
 
-@pytest.mark.parametrize(
-    "page_file",
-    ["4_History.py"],
-)
-def test_streamlit_page_module_raises_not_implemented(page_file: str):
-    repo_root = Path(__file__).resolve().parent.parent
-    page_path = repo_root / "pages" / page_file
-    spec = importlib.util.spec_from_file_location(
-        f"pages.{page_file[:-3]}", page_path
-    )
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    with pytest.raises(NotImplementedError):
-        spec.loader.exec_module(module)
