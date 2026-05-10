@@ -312,3 +312,62 @@ def test_update_proposal_status_writes_status(pg_conn):
     with pg_conn.cursor() as cur:
         cur.execute("SELECT status FROM proposals WHERE proposal_id = 'prop-x'")
         assert cur.fetchone()[0] == "approved"
+
+
+@pytest.mark.postgres
+def test_list_proposals_returns_rows_for_business(pg_conn):
+    from pages import _data
+
+    create_tables(pg_conn)
+    with pg_conn.cursor() as cur:
+        cur.execute("DELETE FROM proposals WHERE business_id = 'nusa_adventures'")
+        cur.execute("DELETE FROM action_feedback WHERE business_id = 'nusa_adventures'")
+    pg_conn.commit()
+    older = _make_proposal(proposal_id="prop-old", summary="older plan")
+    newer = _make_proposal(proposal_id="prop-new", summary="newer plan")
+    object.__setattr__(older, "proposed_at", "2026-05-08T00:00:00")
+    object.__setattr__(newer, "proposed_at", "2026-05-09T00:00:00")
+    save_proposal(pg_conn, older)
+    save_proposal(pg_conn, newer)
+
+    import os
+
+    os.environ["DATABASE_URL"] = pg_conn.info.dsn
+    rows = _data.list_proposals("nusa_adventures")
+    assert len(rows) >= 2
+    summaries = [r["summary_for_owner"] for r in rows]
+    assert summaries.index("newer plan") < summaries.index("older plan")
+    assert {"proposed_at", "status", "rating"} <= set(rows[0].keys())
+
+
+@pytest.mark.postgres
+def test_fetch_latest_trace_synthesizes_from_proposal(pg_conn):
+    from pages import _data
+
+    create_tables(pg_conn)
+    with pg_conn.cursor() as cur:
+        cur.execute("DELETE FROM proposals WHERE business_id = 'nusa_adventures'")
+    pg_conn.commit()
+    save_proposal(pg_conn, _make_proposal(proposal_id="prop-trace"))
+
+    import os
+
+    os.environ["DATABASE_URL"] = pg_conn.info.dsn
+    trace = _data.fetch_latest_trace("nusa_adventures")
+    assert trace is not None
+    assert trace.business_id == "nusa_adventures"
+    roles = [s.agent_role for s in trace.steps]
+    # All five spec §6 agents must appear in the synthesized timeline.
+    assert {
+        "Demand Forecaster",
+        "Demand Modeler",
+        "Logistics Agent",
+        "Communications Agent",
+        "Operations Manager",
+    } <= set(roles)
+    # Forecaster steps cite the dispatcher tool calls run_crew makes.
+    forecaster_tools = {s.tool_called for s in trace.steps if s.agent_role == "Demand Forecaster"}
+    assert {"get_tool_result"} <= forecaster_tools
+    # Final step's observation reflects the proposal's actual priority.
+    assert "priority=" in trace.steps[-1].observation
+    assert trace.steps[-1].is_final is True
