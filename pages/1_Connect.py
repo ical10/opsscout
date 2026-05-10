@@ -11,11 +11,11 @@ NAME_TO_ID = {
     "Kopi Nusa Café": "kopi_nusa_cafe",
 }
 
+choice = st.radio("Pick a demo business", list(NAME_TO_ID.keys()))
+if choice is not None:
+    st.session_state["business_id"] = NAME_TO_ID[choice]
+
 if os.environ.get("DEMO_MODE", "true") == "false":
     st.button("Connect Shopify", disabled=True)
     st.button("Connect Google", disabled=True)
     st.button("Connect Slack", disabled=True)
-else:
-    choice = st.radio("Pick a demo business", list(NAME_TO_ID.keys()))
-    if choice is not None:
-        st.session_state["business_id"] = NAME_TO_ID[choice]

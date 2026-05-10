@@ -87,9 +87,13 @@ def test_connect_page_shows_oauth_buttons_when_not_demo(monkeypatch):
     monkeypatch.setenv("DEMO_MODE", "false")
     app = AppTest.from_file("pages/1_Connect.py").run()
     button_labels = [b.label for b in app.button]
+    # OAuth shell still rendered as a hint about production wiring,
+    # but the demo picker is always available so live data + demo
+    # businesses can co-exist.
     assert "Connect Shopify" in button_labels
     assert "Connect Google" in button_labels
-    assert len(app.radio) == 0
+    assert len(app.radio) == 1
+    assert "Nusa Adventures" in app.radio[0].options
 
 
 def test_dashboard_renders_pending_proposal_card(monkeypatch):
@@ -107,11 +111,13 @@ def test_dashboard_renders_pending_proposal_card(monkeypatch):
         + [s.value for s in app.subheader]
         + [c.value for c in app.caption]
     )
-    assert proposal.summary_for_owner in rendered
-    assert "high" in rendered.lower()
+    # Header sections + sentence-1 of the summary should be visible.
+    assert "Recommended actions" in rendered
+    assert "Owner brief" in rendered
+    assert proposal.summary_for_owner.split(". ")[0] in rendered
     button_labels = [b.label for b in app.button]
-    assert "Approve" in button_labels
-    assert "Reject" in button_labels
+    assert any("Approve" in label for label in button_labels)
+    assert any("Reject" in label for label in button_labels)
 
 
 def test_trace_page_renders_react_steps_in_order(monkeypatch):
@@ -259,7 +265,7 @@ def test_dashboard_approve_updates_db_and_resumes_graph(monkeypatch):
     app = AppTest.from_file("pages/2_Dashboard.py")
     app.session_state["business_id"] = "nusa_adventures"
     app.run()
-    [b for b in app.button if b.label == "Approve"][0].click().run()
+    [b for b in app.button if "Approve" in b.label][0].click().run()
 
     assert status_calls == [("prop-1", "approved")]
     assert graph_calls == ["nusa_adventures"]

@@ -20,6 +20,16 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 
+@pytest.fixture(autouse=True)
+def _pin_demo_mode_to_true(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Streamlit auto-loads .env on import (any test that imports
+    streamlit.testing.v1 leaks DEMO_MODE=false into the pytest process).
+    Pin DEMO_MODE=true for every test by default; tests that need the
+    live-provider path can monkeypatch.setenv themselves.
+    """
+    monkeypatch.setenv("DEMO_MODE", "true")
+
+
 @pytest.fixture(scope="session")
 def fixtures_dir() -> Path:
     return ROOT / "mock" / "fixtures"
