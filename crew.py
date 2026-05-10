@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import os
 
-from crewai import Agent, Task
-from langchain_openai import ChatOpenAI
+from crewai import LLM, Agent, Task
 
 from mcp_tools import get_tool_result
 from models import ActionProposal
@@ -18,8 +17,11 @@ def _execute_agent(agent: Agent, description: str, expected_output: str = "") ->
     task = Task(description=description, expected_output=expected_output, agent=agent)
     return str(agent.execute_task(task))
 
-llm = ChatOpenAI(
-    model="Qwen3-30B-A3B-Instruct-2507",
+# CrewAI 0.80 dispatches via litellm; the `openai/` prefix tells it to
+# treat AMD_VLLM_BASE_URL as an OpenAI-compatible endpoint rather than
+# trying to resolve it as a HuggingFace model id.
+llm = LLM(
+    model="openai/Qwen/Qwen3-30B-A3B-Instruct-2507",
     base_url=os.getenv("AMD_VLLM_BASE_URL", "http://localhost:8000/v1"),
     api_key="not-needed",
     temperature=0.3,
